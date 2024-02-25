@@ -1,0 +1,5 @@
+server:
+  port: "8080"
+grpc:
+  port: "44044"
+  appnum: 1
