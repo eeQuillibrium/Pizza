@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -19,7 +20,19 @@ func main() {
 
 	cfg := config.InitConfig()
 
-	appl := app.New(cfg.GRPC.Port, cfg.StoragePath, cfg.TokenTTL)
+	appl := app.New(
+		cfg.GRPC.Port,
+		cfg.TokenTTL,
+		fmt.Sprintf(
+			"user=%s password=%s host=%s dbname=%s port=%d sslmode=%s",
+			cfg.Storage.Username,
+			os.Getenv("DB_PASSWORD"),
+			cfg.Storage.Host,
+			cfg.Storage.DBName,
+			cfg.Storage.Port,
+			cfg.Storage.SSLMode,
+		),
+	)
 
 	go appl.GRPCSrv.Run()
 

@@ -11,11 +11,11 @@ type App struct {
 }
 
 func New(
-	grpcPort int,
-	storagePath string,
+	port int,
 	tokenTTL time.Duration,
+	dsn string,
 ) *App {
-	grpcApp := grpcapp.New(grpcPort, tokenTTL)
+	grpcApp := grpcapp.New(port, tokenTTL, dsn)
 	return &App{
 		GRPCSrv: grpcApp,
 	}

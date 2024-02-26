@@ -22,15 +22,17 @@ type App struct {
 func New(
 	port int,
 	tokenTTL time.Duration,
+	dsn string,
 ) *App {
 	gRPCServer := grpc.NewServer()
-	authStorage := authstorage.New()
+	authStorage := authstorage.New(dsn)
 	authService := authservice.New(authStorage, tokenTTL)
 	authgrpc.Register(gRPCServer, authService)
 
 	return &App{
 		gRPCServer: gRPCServer,
 		port:       port,
+		tokenTTL: tokenTTL,
 	}
 }
 

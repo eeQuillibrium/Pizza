@@ -27,7 +27,7 @@ type Auth interface {
 	) (bool, error)
 }
 
-//handler
+// handler
 type serverAPI struct {
 	nikita_auth1.UnimplementedAuthServer
 	auth Auth
@@ -50,7 +50,7 @@ func (s *serverAPI) Login(
 	if err != nil {
 		return nil, err
 	}
-	
+
 	resp := &nikita_auth1.LoginResponse{Token: jwt}
 
 	return resp, nil
@@ -64,11 +64,12 @@ func (s *serverAPI) Register(
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
-	if _, err := s.auth.Register(ctx, req.GetLogin(), req.GetPass()); err != nil {
+	userId, err := s.auth.Register(ctx, req.GetLogin(), req.GetPass())
+	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return &nikita_auth1.RegResponse{UserId: userId}, nil
 }
 func (s *serverAPI) IsAdmin(
 	ctx context.Context,

@@ -2,7 +2,6 @@ package config
 
 import (
 	"flag"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -12,11 +11,18 @@ import (
 
 type Config struct {
 	Env         string        `yaml:"env"`
+	Storage     Storage       `yaml:"storage"`
 	StoragePath string        `yaml:"storage_path"`
 	GRPC        GRPCConfig    `yaml:"grpc"`
 	TokenTTL    time.Duration `yaml:"token_ttl"`
 }
-
+type Storage struct {
+	Host     string `yaml:"host"`
+	SSLMode  string `yaml:"sslmode"`
+	Port     int    `yaml:"port"`
+	DBName   string `yaml:"dbname"`
+	Username string `yaml:"username"`
+}
 type GRPCConfig struct {
 	Port    int           `yaml:"port"`
 	Timeout time.Duration `yaml:"timeout"`
@@ -35,7 +41,7 @@ func InitConfig() *Config {
 
 	var cfg Config
 
-	data, _ := ioutil.ReadFile(path)
+	data, _ := os.ReadFile(path)
 
 	err := yaml.Unmarshal(data, &cfg)
 	if err != nil {
