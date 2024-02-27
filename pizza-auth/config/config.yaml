@@ -5,8 +5,8 @@ grpc:
   port: 44044
   timeout: 5s
 storage:
-  sslmode: "disabled"
+  sslmode: "disable"
   host: "localhost"
   port: 5432
-  dbname: "users"
+  dbname: "postgres"
   username: "postgres" 

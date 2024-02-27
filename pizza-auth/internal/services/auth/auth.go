@@ -77,7 +77,7 @@ func (a *Auth) Register(
 	login string,
 	pass string,
 ) (int64, error) {
-	log.Print("try to create user...")
+	log.Print("trying to create user...")
 
 	hash, err := hashPassword(pass)
 	if err != nil {
@@ -90,7 +90,7 @@ func (a *Auth) Register(
 		log.Fatalf("user creating error: %v", err)
 	}
 
-	log.Print("log war registered")
+	log.Print("log was registered!")
 
 	return userId, nil
 }

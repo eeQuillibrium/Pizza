@@ -7,6 +7,7 @@ import (
 
 	"github.com/eeQuillibrium/pizza-auth/internal/domain/models"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 )
 
 type Storage struct {
@@ -21,6 +22,10 @@ func New(dsn string) *Storage {
 		log.Fatalf("db open problem: %v", err)
 	}
 
+	if err := db.Ping(); err != nil {
+		log.Fatalf("db ping error: %v", err)
+	}
+
 	log.Print("success database open!")
 
 	return &Storage{db}
@@ -32,19 +37,24 @@ func (s *Storage) CreateUser(
 	passHash string,
 ) (userId int64, err error) {
 
-	q := fmt.Sprintf("INSERT INTO %s (login, passhash) VALUES($1, $2) returning id", "users")
+	q := fmt.Sprintf("INSERT INTO %s (login, passhash) VALUES ($1, $2) RETURNING id", "users")
 
-	rows := s.DB.QueryRow(q, login, passHash)
+	row := s.DB.QueryRow(q, login, passHash)
 
-	if err := rows.Scan(&userId); err != nil {
+	if err := row.Scan(&userId); err != nil {
 		log.Fatalf("can't scan from rows")
 	}
-	
+
 	return userId, nil
 }
 func (s *Storage) GetUser(
 	ctx context.Context,
 	login string,
 ) (user models.User, err error) {
-	return models.User{}, nil
+
+	q := fmt.Sprintf("SELECT (passhash) FROM %s WHERE login = $1", "users")
+
+	err = s.DB.Get(&user, q, login)
+
+	return user, err
 }

@@ -32,7 +32,7 @@ func New(
 	return &App{
 		gRPCServer: gRPCServer,
 		port:       port,
-		tokenTTL: tokenTTL,
+		tokenTTL:   tokenTTL,
 	}
 }
 

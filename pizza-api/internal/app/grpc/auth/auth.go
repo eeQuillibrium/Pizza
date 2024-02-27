@@ -13,7 +13,7 @@ const (
 )
 
 type GRPCAuth struct {
-	gRPCClient *nikita_auth1.AuthClient
+	gRPCClient nikita_auth1.AuthClient
 	conn       *grpc.ClientConn
 	port       string
 }
@@ -24,7 +24,7 @@ func New(
 ) *GRPCAuth {
 	gRPCClient := nikita_auth1.NewAuthClient(conn)
 	return &GRPCAuth{
-		&gRPCClient,
+		gRPCClient,
 		conn,
 		port,
 	}
@@ -35,7 +35,8 @@ func (g *GRPCAuth) Register(
 	in *nikita_auth1.RegRequest,
 ) (int64, error) {
 
-	r, err := (*g.gRPCClient).Register(ctx, in)
+	log.Printf("trying to proceed user(api): %s, %s", in.GetLogin(), in.GetPass())
+	r, err := g.gRPCClient.Register(ctx, in)
 	if err != nil {
 		log.Fatalf("client grpc in auth(Register): %v", err)
 		return emptyInt, err
@@ -47,7 +48,13 @@ func (g *GRPCAuth) Login(
 	ctx context.Context,
 	in *nikita_auth1.LoginRequest,
 ) (string, error) {
-	return "", nil
+	r, err := g.gRPCClient.Login(ctx, in)
+	if err != nil {
+		log.Fatalf("client grpc in auth(Login): %v", err)
+		return "", err
+	}
+	
+	return r.GetToken(), nil
 }
 func (g *GRPCAuth) IsAdmin(
 	ctx context.Context,
