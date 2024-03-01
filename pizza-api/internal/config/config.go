@@ -25,11 +25,11 @@ func New() *Config {
 	path := fetchConfigPath()
 
 	if path == "" {
-		log.Print("config path problem")
+		log.Print("config path is empty")
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		log.Fatal("config path is empty:", err)
+		log.Fatal("don't have this file in path:", err)
 	}
 
 	data, _ := os.ReadFile(path)

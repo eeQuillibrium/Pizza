@@ -61,7 +61,7 @@ func (a *Auth) Login(
 		log.Print("don't have that user")
 	}
 
-	log.Print("user was identificated")
+	log.Print("user was identified")
 	log.Print("try to create jwt...")
 
 	jwtStr, err := jwt.NewToken(user, a.tokenTTL)

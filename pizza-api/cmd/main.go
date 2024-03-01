@@ -1,24 +1,19 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-
 	"github.com/eeQuillibrium/pizza-api/internal/app"
+	"github.com/eeQuillibrium/pizza-api/internal/config"
 	"github.com/eeQuillibrium/pizza-api/internal/handler"
+	"github.com/spf13/viper"
 )
 
 func main() {
 
-	cfg := InitConfig()
+	cfg := config.New()
 
-	if err := initConfig(); err != nil {
-		log.Fatal("Config reading problem", err)
-	}
+	handl := handler.New(cfg.GRPC.Port)
 
-	handl := handler.New(viper.GetString("grpc.port"))
-
-	app := app.New(viper.GetString("server.port"), handl.InitRoutes())
+	app := app.New(cfg.Server.Port, handl.InitRoutes())
 
 	app.RESTServ.Run("grpc.port")
 
