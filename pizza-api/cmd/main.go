@@ -10,12 +10,14 @@ import (
 
 func main() {
 
+	cfg := InitConfig()
+
 	if err := initConfig(); err != nil {
 		log.Fatal("Config reading problem", err)
 	}
 
 	handl := handler.New(viper.GetString("grpc.port"))
-	
+
 	app := app.New(viper.GetString("server.port"), handl.InitRoutes())
 
 	app.RESTServ.Run("grpc.port")
