@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/eeQuillibrium/pizza-api/internal/app/server"
-	"github.com/gorilla/mux"
 )
 
 type App struct {
@@ -10,9 +9,7 @@ type App struct {
 }
 
 func New(
-	restport string,
-	r *mux.Router,
+	RESTServ *server.Server,
 ) *App {
-	RESTServ := server.New(restport, r)
 	return &App{RESTServ}
 }

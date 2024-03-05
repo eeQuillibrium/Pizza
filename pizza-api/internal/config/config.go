@@ -17,8 +17,15 @@ type Server struct {
 	Port string `yaml:"port"`
 }
 type GRPC struct {
-	Port   string `yaml:"port"`
-	Appnum int    `yaml:"appnum"`
+	Auth    Auth    `yaml:"auth"`
+	Kitchen Kitchen `yaml:"kitchen"`
+	Appnum  int     `yaml:"appnum"`
+}
+type Auth struct {
+	Port int `yaml:"port"`
+}
+type Kitchen struct {
+	Port int `yaml:"port"`
 }
 
 func New() *Config {

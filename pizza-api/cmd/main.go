@@ -4,8 +4,10 @@ import (
 	"log"
 
 	"github.com/eeQuillibrium/pizza-api/internal/app"
+	"github.com/eeQuillibrium/pizza-api/internal/app/server"
 	"github.com/eeQuillibrium/pizza-api/internal/config"
 	"github.com/eeQuillibrium/pizza-api/internal/handler"
+
 	"github.com/joho/godotenv"
 )
 
@@ -16,11 +18,12 @@ func main() {
 
 	cfg := config.New()
 
-	handl := handler.New(cfg.GRPC.Port)
+	handl := handler.New(cfg.GRPC.Auth.Port, cfg.GRPC.Kitchen.Port)
 
-	app := app.New(cfg.Server.Port, handl.InitRoutes())
+	RESTServ := server.New(cfg.Server.Port, handl.InitRoutes())
+	app := app.New(RESTServ)
 
-	app.RESTServ.Run("grpc.port")
+	app.RESTServ.Run()
 
 	//graceful shutdown
 }

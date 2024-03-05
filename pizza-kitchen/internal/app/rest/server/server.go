@@ -1,22 +1,21 @@
 package server
 
 import (
-	"log"
 	"net/http"
 	"time"
 )
 
 type Server struct {
-	server *http.Server
+	httpServ *http.Server
 }
 
 func New(
-	restport string,
-	router http.Handler,
+	port string,
+	handler http.Handler,
 ) *Server {
 	server := &http.Server{
-		Addr:           ":" + restport,
-		Handler:        router,
+		Addr:           ":" + port,
+		Handler:        handler,
 		ReadTimeout:    10000 * time.Millisecond,
 		WriteTimeout:   10000 * time.Millisecond,
 		MaxHeaderBytes: 1 << 20,
@@ -24,8 +23,10 @@ func New(
 
 	return &Server{server}
 }
-func (s *Server) Run() {
-	if err := s.server.ListenAndServe(); err != nil {
-		log.Fatalf("server running problem: %v", err)
-	}
+
+func Run() {
+
+}
+func Stop() {
+
 }

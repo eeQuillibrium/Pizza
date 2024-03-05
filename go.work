@@ -4,5 +4,6 @@ use (
 	./protos
 	./pizza-api
 	./pizza-auth
+	./pizza-kitchen
 	./tester
 )

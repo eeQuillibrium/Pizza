@@ -15,11 +15,11 @@ const (
 type GRPCAuth struct {
 	gRPCClient nikita_auth1.AuthClient
 	conn       *grpc.ClientConn
-	port       string
+	port       int
 }
 
 func New(
-	port string,
+	port int,
 	conn *grpc.ClientConn,
 ) *GRPCAuth {
 	gRPCClient := nikita_auth1.NewAuthClient(conn)

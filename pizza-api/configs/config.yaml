@@ -1,5 +1,9 @@
 server:
   port: "8080"
 grpc:
-  port: "44044"
+  auth:
+    port: 44044
+  kitchen:
+    port: 44045
   appnum: 1
+  

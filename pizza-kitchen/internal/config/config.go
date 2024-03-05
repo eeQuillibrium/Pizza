@@ -9,10 +9,15 @@ import (
 )
 
 type Config struct {
-	GRPC GRPC
+	GRPC GRPCApp
+	REST RESTApp
 }
-type GRPC struct {
-	Port string
+type GRPCApp struct {
+	Port string `yaml:"port"`
+	Appnum int `yaml:"appnum"`
+}
+type RESTApp struct {
+	Port string `yaml:"port"`
 }
 
 func New() *Config {

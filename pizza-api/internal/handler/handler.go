@@ -20,9 +20,10 @@ type Handler struct {
 }
 
 func New(
-	port string,
+	authport int,
+	kitchenport int,
 ) *Handler {
-	grpcapp := grpcapp.New(port)
+	grpcapp := grpcapp.New(authport, kitchenport)
 	return &Handler{grpcapp}
 }
 
