@@ -50,8 +50,7 @@ func fetchConfigPath() string {
 	flag.Parse()
 
 	if path == "" {
-		os.Getenv("CONFIG_PATH")
+		path = os.Getenv("CONFIG_PATH")
 	}
-
 	return path
 }

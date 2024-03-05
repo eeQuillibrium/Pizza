@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	nikita_auth1 "github.com/eeQuillibrium/protos/proto/gen/go/auth"
+	nikita_auth1 "github.com/eeQuillibrium/protos/gen/go/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	nikita_auth1 "github.com/eeQuillibrium/protos/proto/gen/go/auth"
+	nikita_auth1 "github.com/eeQuillibrium/protos/gen/go/auth"
 	"google.golang.org/grpc"
 )
 
@@ -53,7 +53,7 @@ func (g *GRPCAuth) Login(
 		log.Fatalf("client grpc in auth(Login): %v", err)
 		return "", err
 	}
-	
+
 	return r.GetToken(), nil
 }
 func (g *GRPCAuth) IsAdmin(

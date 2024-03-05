@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
 	grpcapp "github.com/eeQuillibrium/pizza-api/internal/app/grpc"
 	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
-	nikita_auth1 "github.com/eeQuillibrium/protos/proto/gen/go/auth"
+	nikita_auth1 "github.com/eeQuillibrium/protos/gen/go/auth"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 )
@@ -27,20 +28,36 @@ func New(
 
 func (h *Handler) InitRoutes() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/", h.HomeHandler)
-	r.HandleFunc("/contacts", h.ContactsHandler)
+
+	r.HandleFunc("/orders", h.OrderHandler)
+	r.HandleFunc("/orders/exec", h.OrderExecHandler)
+
 	r.HandleFunc("/auth/signUp", h.SignUpHandler)
 	r.HandleFunc("/auth/signIn", h.SignInHandler)
+
 	return r
 }
 
-func (h *Handler) HomeHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Homepage request, method:", r.Method+"...")
+func (h *Handler) OrderHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Order request, method:", r.Method+"...")
+}
+
+func (h *Handler) OrderExecHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("OrderExec request, method:", r.Method+"...")
+
+	var order models.Order
+	b, err := io.ReadAll(r.Body)
+	//err := json.NewDecoder(r.Body).Decode(&order)
+	if err != nil {
+		log.Fatalf("order json decode problem: %v", err)
+	}
+	log.Print(string(b))
+	json.Unmarshal(b, &order)
+
+	log.Printf("order parameters: UserId: %d Price: %0.2f Units: %v", order.UserId, order.Price, order.Units)
 
 }
-func (h *Handler) ContactsHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("contactpage")
-}
+
 func (h *Handler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print("request for signUp...")
 
@@ -62,8 +79,10 @@ func (h *Handler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("user with id=%d was registered completely!", userId)
+
 	w.Write([]byte(fmt.Sprintf("user with id=%d was registered completely!", userId)))
 }
+
 func (h *Handler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print("request for signIn...")
 
@@ -85,4 +104,11 @@ func (h *Handler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("successful login! token: %s", token)
+
+	http.SetCookie(w, &http.Cookie{
+		Name:  "token_bearer",
+		Value: token,
+	})
+
+	http.Redirect(w, r, "localhost", http.StatusPermanentRedirect)
 }

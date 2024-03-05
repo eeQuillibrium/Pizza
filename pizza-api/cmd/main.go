@@ -1,13 +1,18 @@
 package main
 
 import (
+	"log"
+
 	"github.com/eeQuillibrium/pizza-api/internal/app"
 	"github.com/eeQuillibrium/pizza-api/internal/config"
 	"github.com/eeQuillibrium/pizza-api/internal/handler"
-	"github.com/spf13/viper"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf(".env reading err: %v", err)
+	}
 
 	cfg := config.New()
 
@@ -18,10 +23,4 @@ func main() {
 	app.RESTServ.Run("grpc.port")
 
 	//graceful shutdown
-}
-
-func initConfig() error {
-	viper.AddConfigPath("internal/configs")
-	viper.SetConfigName("config")
-	return viper.ReadInConfig()
 }

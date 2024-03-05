@@ -6,7 +6,7 @@ import (
 	"log"
 
 	grpcauth "github.com/eeQuillibrium/pizza-api/internal/app/grpc/auth"
-	nikita_auth1 "github.com/eeQuillibrium/protos/proto/gen/go/auth"
+	nikita_auth1 "github.com/eeQuillibrium/protos/gen/go/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
