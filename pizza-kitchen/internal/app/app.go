@@ -1,8 +1,9 @@
 package app
 
 import (
-	"github.com/eeQuillibrium/pizza-kitchen/internal/app/rest"
-	"github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc"
+	grpcapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc"
+	restapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/rest"
+	handler "github.com/eeQuillibrium/pizza-kitchen/internal/handlers"
 )
 
 type App struct {
@@ -10,9 +11,20 @@ type App struct {
 	RESTServ *restapp.RESTApp
 }
 
-func New() *App {
+func New(
+	grpcPortApi int,
+	//grpcPortDel int,
+	restport int,
+) *App {
+	router := handler.InitRoutes()
+	
 	return &App{
-		grpcapp.New(),
-		restapp.New(),
+		grpcapp.New(grpcPortApi),
+		restapp.New(restport, router),
 	}
+}
+
+func (a *App) Run() {
+	a.GRPCApp.Run()
+	a.RESTServ.Run()
 }

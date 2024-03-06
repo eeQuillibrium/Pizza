@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -10,11 +12,11 @@ type Server struct {
 }
 
 func New(
-	port string,
+	port int,
 	handler http.Handler,
 ) *Server {
 	server := &http.Server{
-		Addr:           ":" + port,
+		Addr:           fmt.Sprintf(":%d", port),
 		Handler:        handler,
 		ReadTimeout:    10000 * time.Millisecond,
 		WriteTimeout:   10000 * time.Millisecond,
@@ -24,7 +26,11 @@ func New(
 	return &Server{server}
 }
 
-func Run() {
+func (s *Server) Run() {
+	err := s.httpServ.ListenAndServe()
+	if err != nil {
+		log.Fatalf("listen rest kitchen: %v", err)
+	}
 
 }
 func Stop() {

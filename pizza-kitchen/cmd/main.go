@@ -8,8 +8,10 @@ import (
 func main() {
 
 	cfg := config.New()
-	
-	app := app.New()
+
+	app := app.New(cfg.GRPC.Kitchenapi.Port, cfg.REST.Port)
 
 	app.Run()
+
+	//Graceful shutdown
 }

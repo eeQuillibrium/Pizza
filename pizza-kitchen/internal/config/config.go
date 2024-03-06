@@ -9,15 +9,22 @@ import (
 )
 
 type Config struct {
-	GRPC GRPCApp
-	REST RESTApp
+	GRPC GRPCApp `yaml:"grpcapp"`
+	REST RESTApp `yaml:"restapp"`
 }
 type GRPCApp struct {
-	Port string `yaml:"port"`
-	Appnum int `yaml:"appnum"`
+	Kitchenapi Kitcheapi  `yaml:"kitchenapi"`
+	Kitchendel Kitchendel `yaml:"kitchendel"`
+	Appnum     int        `yaml:"appnum"`
+}
+type Kitcheapi struct {
+	Port int `yaml:"port"`
+}
+type Kitchendel struct {
+	Port int `yaml:"port"`
 }
 type RESTApp struct {
-	Port string `yaml:"port"`
+	Port int `yaml:"port"`
 }
 
 func New() *Config {

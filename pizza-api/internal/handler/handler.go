@@ -56,7 +56,7 @@ func (h *Handler) OrderExecHandler(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(b, &order)
 
 	log.Printf("order parameters: UserId: %d Price: %0.2f Units: %v", order.UserId, order.Price, order.Units)
-
+	
 }
 
 func (h *Handler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
