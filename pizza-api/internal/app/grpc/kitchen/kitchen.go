@@ -29,14 +29,14 @@ func New(
 func (k *Kitchen) SendMessage(
 	ctx context.Context,
 	in *nikita_kitchen1.SendOrderReq,
-) (nikita_kitchen1.EmptyOrderResp, error) {
+) (*nikita_kitchen1.EmptyOrderResp, error) {
 	log.Print("try to proceeds req with kitchen...")
 	_, err := k.gRPCClient.SendOrder(ctx, in)
 	if err != nil {
 		log.Fatalf("sendorder grpc req err: %v", err)
 	}
 	log.Print("empty order was gotten!")
-	return nikita_kitchen1.EmptyOrderResp{}, nil
+	return &nikita_kitchen1.EmptyOrderResp{}, nil
 }
 
 func (k *Kitchen) Stop() {

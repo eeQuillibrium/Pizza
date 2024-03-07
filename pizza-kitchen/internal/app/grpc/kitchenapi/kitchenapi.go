@@ -28,11 +28,10 @@ func Register(
 ) {
 	nikita_kitchen1.RegisterKitchenServer(serv, &serverAPI{kitchenAPI: service})
 }
-
-func (s *serverAPI) SendMessage(
+func (s *serverAPI) SendOrder(
 	ctx context.Context,
-	in *nikita_kitchen1.SendOrderReq,
+	r *nikita_kitchen1.SendOrderReq,
 ) (*nikita_kitchen1.EmptyOrderResp, error) {
-	log.Print("sendmessage handler executed...")
+	log.Printf("sendmessage handler executed... id: %d, price: %d", r.Userid, r.Price)
 	return &nikita_kitchen1.EmptyOrderResp{}, nil
 }
