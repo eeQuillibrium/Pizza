@@ -15,6 +15,4 @@ func New() *KitchenAPI {
 func (k *KitchenAPI) SendMessage(
 	ctx context.Context,
 	in *nikita_kitchen1.SendOrderReq,
-) (out *nikita_kitchen1.EmptyOrderResp) {
-	return &nikita_kitchen1.EmptyOrderResp{}
-}
+) () {}

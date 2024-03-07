@@ -1,6 +1,7 @@
 package restapp
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/eeQuillibrium/pizza-kitchen/internal/app/rest/server"
@@ -23,5 +24,6 @@ func New(
 }
 
 func (a *RESTApp) Run() {
+	log.Print("try to run rest server")
 	a.Server.Run()
 }

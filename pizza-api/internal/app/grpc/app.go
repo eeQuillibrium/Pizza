@@ -28,11 +28,12 @@ type Auth interface {
 		in *nikita_auth1.IsAdminRequest,
 	) (bool, error)
 }
+
 type Kitchen interface {
 	SendMessage(
 		ctx context.Context,
 		in *nikita_kitchen1.SendOrderReq,
-	)
+	) (*nikita_kitchen1.EmptyOrderResp, error)
 }
 
 type GRPCApp struct {
@@ -49,13 +50,16 @@ func New(
 
 	authconn := setConn(authport)
 	auth := grpcauth.New(authport, authconn)
+	log.Print("authgrpc connect successful!")
 
+	log.Print("trying to set connection with kitchen server...")
 	kitchenconn := setConn(kitchenport)
 	kitchen := grpckitchen.New(kitchenport, kitchenconn)
+	log.Print("kitchen connect successful!")
 
 	return &GRPCApp{
-		auth,
-		kitchen,
+		Auth:    auth,
+		Kitchen: kitchen,
 	}
 }
 func setConn(port int) *grpc.ClientConn {

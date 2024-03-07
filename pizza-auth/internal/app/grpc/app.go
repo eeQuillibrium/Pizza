@@ -5,10 +5,11 @@ import (
 	"net"
 	"time"
 
+	"log"
+
 	authgrpc "github.com/eeQuillibrium/pizza-auth/internal/app/server"
 	authservice "github.com/eeQuillibrium/pizza-auth/internal/services/auth"
 	authstorage "github.com/eeQuillibrium/pizza-auth/internal/storage"
-	"github.com/rs/zerolog/log"
 
 	"google.golang.org/grpc"
 )

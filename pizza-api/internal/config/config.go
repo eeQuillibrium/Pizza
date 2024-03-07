@@ -53,7 +53,7 @@ func New() *Config {
 func fetchConfigPath() string {
 	var path string
 
-	flag.StringVar(&path, "config", "", "path to config")
+	flag.StringVar(&path, "configpath", "", "path to config")
 	flag.Parse()
 
 	if path == "" {

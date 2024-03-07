@@ -5,14 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
 	grpcapp "github.com/eeQuillibrium/pizza-api/internal/app/grpc"
 	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
 	nikita_auth1 "github.com/eeQuillibrium/protos/gen/go/auth"
+	nikita_kitchen1 "github.com/eeQuillibrium/protos/gen/go/kitchen"
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
 )
 
 type Handler struct {
@@ -48,15 +49,29 @@ func (h *Handler) OrderExecHandler(w http.ResponseWriter, r *http.Request) {
 
 	var order models.Order
 	b, err := io.ReadAll(r.Body)
-	//err := json.NewDecoder(r.Body).Decode(&order)
 	if err != nil {
 		log.Fatalf("order json decode problem: %v", err)
 	}
 	log.Print(string(b))
 	json.Unmarshal(b, &order)
 
+	var units []*nikita_kitchen1.SendOrderReq_PieceUnitnum = make([]*nikita_kitchen1.SendOrderReq_PieceUnitnum, len(order.Units))
+	for i := 0; i < len(order.Units); i++ {
+		units = append(units, &nikita_kitchen1.SendOrderReq_PieceUnitnum{
+			Piece:   int64(order.Units[i].Piece),
+			Unitnum: int64(order.Units[i].Unitnum),
+		})
+	}
 	log.Printf("order parameters: UserId: %d Price: %0.2f Units: %v", order.UserId, order.Price, order.Units)
-	
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	h.GRPCapp.Kitchen.SendMessage(
+		ctx,
+		&nikita_kitchen1.SendOrderReq{Units: units, Userid: int64(order.UserId), Price: int64(order.Price)},
+	)
+	log.Print("successful sendmessage execution")
 }
 
 func (h *Handler) SignUpHandler(w http.ResponseWriter, r *http.Request) {

@@ -13,19 +13,20 @@ type KitchenAPI interface {
 	SendMessage(
 		ctx context.Context,
 		in *nikita_kitchen1.SendOrderReq,
-	) (out *nikita_kitchen1.EmptyOrderResp)
+	)
 }
 
+// implemented all service func (handlers)
 type serverAPI struct {
-	KitchenAPI KitchenAPI
 	nikita_kitchen1.UnimplementedKitchenServer
+	kitchenAPI KitchenAPI // service
 }
 
 func Register(
 	serv *grpc.Server,
 	service KitchenAPI,
 ) {
-	nikita_kitchen1.RegisterKitchenServer(serv, &serverAPI{KitchenAPI: service})
+	nikita_kitchen1.RegisterKitchenServer(serv, &serverAPI{kitchenAPI: service})
 }
 
 func (s *serverAPI) SendMessage(
