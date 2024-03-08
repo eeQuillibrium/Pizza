@@ -1,11 +1,11 @@
 package app
 
 import (
-	"log"
+	"net/http"
 
 	grpcapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc"
 	restapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/rest"
-	handler "github.com/eeQuillibrium/pizza-kitchen/internal/handlers"
+	"github.com/eeQuillibrium/pizza-kitchen/internal/service"
 )
 
 type App struct {
@@ -17,18 +17,18 @@ func New(
 	grpcPortApi int,
 	//grpcPortDel int,
 	restport int,
+	router http.Handler,
+	service *service.Service,
 ) *App {
-	log.Print("routes initializing")
-	router := handler.InitRoutes()
 
 	return &App{
-		grpcapp.New(grpcPortApi),
+		grpcapp.New(grpcPortApi, service),
 		restapp.New(restport, router),
 	}
 }
 
 func (a *App) Run() {
-	
+
 	a.GRPCApp.Run()
 	a.RESTServ.Run()
 }

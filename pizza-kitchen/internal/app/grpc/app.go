@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 
-	"github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc/kitchenapi"
-	kitchenapiService "github.com/eeQuillibrium/pizza-kitchen/internal/services/kitchenapi"
+	"github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc/server"
+	"github.com/eeQuillibrium/pizza-kitchen/internal/service"
 	"google.golang.org/grpc"
 )
 
@@ -17,12 +17,12 @@ type GRPCApp struct {
 
 func New(
 	portApi int,
+	kAPIService *service.Service,
 	//grpcPortDel int,
 ) *GRPCApp {
 
 	grpcServAPI := grpc.NewServer()
-	kAPIService := kitchenapiService.New()
-	kitchenapi.Register(grpcServAPI, kAPIService)
+	server.Register(grpcServAPI, kAPIService)
 
 	return &GRPCApp{
 		portApi:     portApi,

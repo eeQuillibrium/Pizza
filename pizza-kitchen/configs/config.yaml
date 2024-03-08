@@ -6,3 +6,8 @@ grpcapp:
   appnum: 2
 restapp:
   port: 8081
+repo:
+  redis:
+    port: 6379
+    password: ""
+    db: 0

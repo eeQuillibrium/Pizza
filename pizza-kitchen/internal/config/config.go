@@ -11,6 +11,7 @@ import (
 type Config struct {
 	GRPC GRPCApp `yaml:"grpcapp"`
 	REST RESTApp `yaml:"restapp"`
+	Repo Repo    `yaml:"repo"`
 }
 type GRPCApp struct {
 	Kitchenapi Kitcheapi  `yaml:"kitchenapi"`
@@ -23,11 +24,23 @@ type Kitcheapi struct {
 type Kitchendel struct {
 	Port int `yaml:"port"`
 }
+
 type RESTApp struct {
 	Port int `yaml:"port"`
 }
 
+type Repo struct {
+	Redis Redis `yaml:"redis"`
+}
+type Redis struct {
+	Port     int    `yaml:"port"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
+}
+
 func New() *Config {
+
+	log.Print("try to load config...")
 
 	path := fetchConfigPath()
 
@@ -47,6 +60,8 @@ func New() *Config {
 	if err != nil {
 		log.Fatalf("error with cfg unmarshal: %v", err)
 	}
+
+	log.Print("config loaded successful")
 
 	return &cfg
 }
