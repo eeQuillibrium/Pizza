@@ -7,6 +7,8 @@ import (
 
 	grpcauth "github.com/eeQuillibrium/pizza-api/internal/app/grpc/auth"
 	grpckitchen "github.com/eeQuillibrium/pizza-api/internal/app/grpc/kitchen"
+	grpcserver "github.com/eeQuillibrium/pizza-api/internal/app/grpc/server"
+	"github.com/eeQuillibrium/pizza-api/internal/service"
 	nikita_auth1 "github.com/eeQuillibrium/protos/gen/go/auth"
 	nikita_kitchen1 "github.com/eeQuillibrium/protos/gen/go/kitchen"
 	"google.golang.org/grpc"
@@ -39,12 +41,14 @@ type Kitchen interface {
 type GRPCApp struct {
 	Auth    Auth
 	Kitchen Kitchen
+	Server  *grpc.Server
 	//other grpc apps
 }
 
 func New(
 	authport int,
 	kitchenport int,
+	kService service.OrderProvider,
 ) *GRPCApp {
 	log.Print("trying to set connection with authgrpc server...")
 
@@ -57,11 +61,16 @@ func New(
 	kitchen := grpckitchen.New(kitchenport, kitchenconn)
 	log.Print("kitchen connect successful!")
 
+	serv := grpc.NewServer()
+	grpcserver.Register(serv, kService)
+
 	return &GRPCApp{
 		Auth:    auth,
 		Kitchen: kitchen,
+		Server:  serv,
 	}
 }
+
 func setConn(port int) *grpc.ClientConn {
 	conn, err := grpc.Dial(fmt.Sprintf("localhost:%v", port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -69,6 +78,7 @@ func setConn(port int) *grpc.ClientConn {
 	}
 	return conn
 }
+
 func (a *GRPCApp) Stop() {
 
 }

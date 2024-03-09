@@ -10,9 +10,11 @@ import (
 
 // grpc, rest, storage
 type Config struct {
-	Server Server
-	GRPC   GRPC
+	Server Server `yaml:"server"`
+	GRPC   GRPC   `yaml:"grpc"`
+	Repo   Repo   `yaml:"repo"`
 }
+
 type Server struct {
 	Port string `yaml:"port"`
 }
@@ -26,6 +28,15 @@ type Auth struct {
 }
 type Kitchen struct {
 	Port int `yaml:"port"`
+}
+
+type Repo struct {
+	Redis Redis `yaml:"redis"`
+}
+type Redis struct {
+	Port     int    `yaml:"port"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
 }
 
 func New() *Config {

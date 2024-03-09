@@ -18,7 +18,7 @@ func NewRedisDB(client *redis.Client) *RedisDB {
 	return &RedisDB{Client: client}
 }
 
-func (r *RedisDB) CreateOrder(
+func (r *RedisDB) StoreOrder(
 	ctx context.Context,
 	order *models.Order,
 ) error {
@@ -44,7 +44,7 @@ func (r *RedisDB) CreateOrder(
 		}
 	}
 
-	log.Print("successful order creation!")
+	log.Print("successful order storing!")
 
 	order_Test(ctx, r, orderkey)
 

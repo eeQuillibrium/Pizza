@@ -36,12 +36,11 @@ func (s *KitchenAPIService) SendMessage(
 			})
 	}
 
-	err := s.repo.CreateOrder(ctx, order)
-	
+	err := s.repo.StoreOrder(ctx, order)
+
 	if err != nil {
 		return err
 	}
-	
 
 	return nil
 }

@@ -8,7 +8,7 @@ import (
 )
 
 type KitchenAPI interface {
-	CreateOrder(
+	StoreOrder(
 		ctx context.Context,
 		order *models.Order,
 	) error

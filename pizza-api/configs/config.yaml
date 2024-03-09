@@ -6,4 +6,9 @@ grpc:
   kitchen:
     port: 44045
   appnum: 1
+repo:
+  redis:
+    port: 6378
+    password: ""
+    db: 0
   
