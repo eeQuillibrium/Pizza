@@ -30,7 +30,7 @@ func (s *KitchenAPIService) SendMessage(
 
 	for i := 0; i < len(in.Units); i++ {
 		order.Units = append(order.Units,
-			&models.PieceUnitnum{
+			models.PieceUnitnum{
 				Unitnum: in.Units[i].Unitnum,
 				Piece:   in.Units[i].Piece,
 			})

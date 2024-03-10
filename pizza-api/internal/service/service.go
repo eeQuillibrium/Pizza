@@ -9,7 +9,7 @@ import (
 
 // OrderProvider - OP
 type OrderProvider interface {
-	SendMessage(
+	ProvideOrder(
 		ctx context.Context,
 		in *nikita_kitchen1.SendOrderReq,
 	) error

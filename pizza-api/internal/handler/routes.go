@@ -49,16 +49,17 @@ func (h *Handler) OrderExecHandler(w http.ResponseWriter, r *http.Request) {
 			Unitnum: int64(order.Units[i].Unitnum),
 		})
 	}
-	log.Printf("order parameters: UserId: %d Price: %0.2f Units: %v", order.UserId, order.Price, order.Units)
+	log.Printf("order parameters: UserId: %d Price: %d Units: %v", order.UserId, order.Price, order.Units)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	h.GRPCapp.Kitchen.SendMessage(
+	h.GRPCApp.Kitchen.SendOrder(
 		ctx,
 		&nikita_kitchen1.SendOrderReq{Units: units, Userid: int64(order.UserId), Price: int64(order.Price)},
 	)
-	log.Print("successful sendmessage execution")
+	
+	log.Print("successful sendorder execution")
 }
 
 func (h *Handler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +77,7 @@ func (h *Handler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	userId, err := h.GRPCapp.Auth.Register(ctx, &nikita_auth1.RegRequest{Login: u.Login, Pass: u.Password})
+	userId, err := h.GRPCApp.Auth.Register(ctx, &nikita_auth1.RegRequest{Login: u.Login, Pass: u.Password})
 	if err != nil {
 		log.Fatalf("registration error: %v", err)
 	}
@@ -101,7 +102,7 @@ func (h *Handler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	token, err := h.GRPCapp.Auth.Login(ctx, &nikita_auth1.LoginRequest{Login: u.Login, Pass: u.Password, AppId: 1})
+	token, err := h.GRPCApp.Auth.Login(ctx, &nikita_auth1.LoginRequest{Login: u.Login, Pass: u.Password, AppId: 1})
 	if err != nil {
 		log.Fatalf("login error: %v", err)
 	}

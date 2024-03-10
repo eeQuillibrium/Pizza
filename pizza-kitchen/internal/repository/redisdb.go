@@ -22,7 +22,7 @@ func (r *RedisDB) StoreOrder(
 	ctx context.Context,
 	order *models.Order,
 ) error {
-	log.Print("try to create order in redis...")
+	log.Print("try to store order in redis...")
 
 	orderkey := fmt.Sprintf("order:%d", 10e8+rand.Intn(9*10e8-1))
 	err := r.Client.HSet(
@@ -32,7 +32,7 @@ func (r *RedisDB) StoreOrder(
 		"price", order.Price,
 	).Err()
 	if err != nil {
-		log.Print("unsuccessful order creation")
+		log.Print("unsuccessful order storing")
 		return err
 	}
 

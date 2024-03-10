@@ -16,17 +16,21 @@ type Config struct {
 }
 
 type Server struct {
-	Port string `yaml:"port"`
+	Port int `yaml:"port"`
 }
 type GRPC struct {
-	Auth    Auth    `yaml:"auth"`
-	Kitchen Kitchen `yaml:"kitchen"`
-	Appnum  int     `yaml:"appnum"`
+	Auth         Auth         `yaml:"auth"`
+	Kitchen      Kitchen      `yaml:"kitchen"`
+	KitchenOrder KitchenOrder `yaml:"kitchenorder"`
+	Appnum       int          `yaml:"appnum"`
 }
 type Auth struct {
 	Port int `yaml:"port"`
 }
 type Kitchen struct {
+	Port int `yaml:"port"`
+}
+type KitchenOrder struct {
 	Port int `yaml:"port"`
 }
 

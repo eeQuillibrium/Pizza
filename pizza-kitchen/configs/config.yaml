@@ -1,8 +1,9 @@
 grpcapp:
   kitchenapi:
-    port: 44045
-  kitchendel:
-    port: 44046
+    client:
+      port: 44046
+    server:
+      port: 44045
   appnum: 2
 restapp:
   port: 8081

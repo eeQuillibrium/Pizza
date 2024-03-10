@@ -23,8 +23,12 @@ func Register(
 
 func (s *GRPCServer) SendOrder(
 	ctx context.Context,
-	req *nikita_kitchen1.SendOrderReq,
+	in *nikita_kitchen1.SendOrderReq,
 ) (*nikita_kitchen1.EmptyOrderResp, error) {
 	log.Print("handler in pizzapi was performed")
+	err := s.service.ProvideOrder(ctx, in)
+	if err != nil {
+		log.Fatalf("Storing problem: %v", err)
+	}
 	return &nikita_kitchen1.EmptyOrderResp{}, nil
 }

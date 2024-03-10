@@ -13,15 +13,20 @@ type Config struct {
 	REST RESTApp `yaml:"restapp"`
 	Repo Repo    `yaml:"repo"`
 }
+
 type GRPCApp struct {
 	Kitchenapi Kitcheapi  `yaml:"kitchenapi"`
-	Kitchendel Kitchendel `yaml:"kitchendel"`
 	Appnum     int        `yaml:"appnum"`
 }
+
 type Kitcheapi struct {
+	Client Client `yaml:"client"`
+	Server Server `yaml:"server"`
+}
+type Client struct {
 	Port int `yaml:"port"`
 }
-type Kitchendel struct {
+type Server struct {
 	Port int `yaml:"port"`
 }
 

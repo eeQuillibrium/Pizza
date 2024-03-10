@@ -1,10 +1,12 @@
 server:
-  port: "8080"
+  port: 8082
 grpc:
   auth:
     port: 44044
   kitchen:
     port: 44045
+  kitchenorder:
+    port: 44046
   appnum: 1
 repo:
   redis:

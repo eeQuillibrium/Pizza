@@ -26,7 +26,7 @@ func New(
 	}
 }
 
-func (k *Kitchen) SendMessage(
+func (k *Kitchen) SendOrder(
 	ctx context.Context,
 	in *nikita_kitchen1.SendOrderReq,
 ) (*nikita_kitchen1.EmptyOrderResp, error) {

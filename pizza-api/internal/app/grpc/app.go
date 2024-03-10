@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 
 	grpcauth "github.com/eeQuillibrium/pizza-api/internal/app/grpc/auth"
 	grpckitchen "github.com/eeQuillibrium/pizza-api/internal/app/grpc/kitchen"
@@ -32,17 +33,17 @@ type Auth interface {
 }
 
 type Kitchen interface {
-	SendMessage(
+	SendOrder(
 		ctx context.Context,
 		in *nikita_kitchen1.SendOrderReq,
 	) (*nikita_kitchen1.EmptyOrderResp, error)
 }
 
 type GRPCApp struct {
-	Auth    Auth
-	Kitchen Kitchen
-	Server  *grpc.Server
-	//other grpc apps
+	Auth        Auth
+	Kitchen     Kitchen
+	OrderServer *grpc.Server
+	//other grpc
 }
 
 func New(
@@ -65,9 +66,9 @@ func New(
 	grpcserver.Register(serv, kService)
 
 	return &GRPCApp{
-		Auth:    auth,
-		Kitchen: kitchen,
-		Server:  serv,
+		Auth:        auth,
+		Kitchen:     kitchen,
+		OrderServer: serv,
 	}
 }
 
@@ -79,6 +80,22 @@ func setConn(port int) *grpc.ClientConn {
 	return conn
 }
 
-func (a *GRPCApp) Stop() {
+func (a *GRPCApp) Run(
+	orderPort int,
+) {
+	log.Printf("try to run grpc kitchenapi serv on %s", fmt.Sprintf(":%d", orderPort))
 
+	lst, err := net.Listen("tcp", fmt.Sprintf(":%d", orderPort))
+
+	if err != nil {
+		log.Fatalf("listen was dropped")
+	}
+
+	if err := a.OrderServer.Serve(lst); err != nil {
+		log.Fatalf("serving was dropped")
+	}
+}
+
+func (a *GRPCApp) Stop() {
+	a.OrderServer.GracefulStop()
 }

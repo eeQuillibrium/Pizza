@@ -1,12 +1,18 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
 	"github.com/redis/go-redis/v9"
 )
+
 // OrderProvider - OP
 type OrderProvider interface {
-	StoreOrder(order *models.Order)
+	StoreOrder(
+		ctx context.Context,
+		order *models.Order,
+	) error
 }
 
 type Repository struct {

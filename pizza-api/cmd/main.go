@@ -33,9 +33,10 @@ func main() {
 	handl := handler.New(cfg.GRPC.Auth.Port, cfg.GRPC.Kitchen.Port, services)
 
 	RESTServ := server.New(cfg.Server.Port, handl.InitRoutes())
-	app := app.New(RESTServ)
+	
+	app := app.New(RESTServ, handl.GRPCApp)
 
-	app.RESTServ.Run()
-
+	app.Run(cfg.GRPC.KitchenOrder.Port)
+	
 	//graceful shutdown
 }

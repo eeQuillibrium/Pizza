@@ -1,6 +1,11 @@
 package repository
 
 import (
+	"context"
+	"fmt"
+	"log"
+	"math/rand"
+
 	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
 	"github.com/redis/go-redis/v9"
 )
@@ -15,6 +20,39 @@ func NewOPRepo(
 	return &OPRepo{repo: rClient}
 }
 
-func (r *OPRepo) StoreOrder(order *models.Order) {
+func (r *OPRepo) StoreOrder(
+	ctx context.Context,
+	order *models.Order,
+) error {
+	log.Print("try to store order in redis...")
 
+	orderkey := fmt.Sprintf("order:%d", 10e8+rand.Intn(9*10e8-1))
+	
+	err := r.repo.HSet(
+		ctx,
+		orderkey,
+		"userid", order.UserId,
+		"price", order.Price,
+	).Err()
+	if err != nil {
+		log.Print("unsuccessful order creation")
+		return err
+	}
+
+	for i := 0; i < len(order.Units); i++ {
+		err := r.repo.HSet(
+			ctx,
+			orderkey,
+			order.Units[i].Unitnum,
+			order.Units[i].Piece,
+		).Err()
+		if err != nil {
+			log.Print("unsuccessful order creation")
+			return err
+		}
+	}
+
+	log.Print("successful order storing!")
+
+	return nil
 }

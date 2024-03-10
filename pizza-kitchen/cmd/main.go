@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"github.com/eeQuillibrium/pizza-kitchen/internal/app"
+	grpcapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc"
+	restapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/rest"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/config"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/handler"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/repository"
@@ -25,15 +27,18 @@ func main() {
 
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("localhost:%d", cfg.Repo.Redis.Port),
-		Password: cfg.Repo.Redis.Password, 
-		DB:       cfg.Repo.Redis.DB,       
+		Password: cfg.Repo.Redis.Password,
+		DB:       cfg.Repo.Redis.DB,
 	})
+
 	repo := repository.New(client)
 	service := service.New(repo)
-	handl := handler.New(service)
-	router := handl.InitRoutes()
 
-	app := app.New(cfg.GRPC.Kitchenapi.Port, cfg.REST.Port, router, service)
+	grpcApp := grpcapp.New(cfg.GRPC.Kitchenapi.Client.Port, cfg.GRPC.Kitchenapi.Server.Port, service)
+	handl := handler.New(grpcApp, service)
+	restApp := restapp.New(cfg.REST.Port, handl.InitRoutes())
+
+	app := app.New(grpcApp, restApp)
 
 	app.Run()
 

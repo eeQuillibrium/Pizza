@@ -5,11 +5,8 @@ import (
 	"github.com/eeQuillibrium/pizza-api/internal/service"
 )
 
-
-
-
 type Handler struct {
-	GRPCapp *grpcapp.GRPCApp
+	GRPCApp *grpcapp.GRPCApp
 }
 
 func New(
