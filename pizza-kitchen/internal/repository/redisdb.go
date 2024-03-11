@@ -37,9 +37,11 @@ func (r *RedisDB) StoreOrder(
 	}
 
 	for i := 0; i < len(order.Units); i++ {
-		err := r.Client.HSet(ctx, orderkey, order.Units[i].Unitnum, order.Units[i].Piece).Err()
+		err := r.Client.HSet(ctx, orderkey,
+			fmt.Sprintf("unitnum%d", i), order.Units[i].Unitnum,
+			fmt.Sprintf("piece%d", i), order.Units[i].Piece).Err()
 		if err != nil {
-			log.Print("unsuccessful order creation")
+			log.Print("unsuccessful order storing")
 			return err
 		}
 	}
@@ -53,6 +55,7 @@ func (r *RedisDB) StoreOrder(
 func (r *RedisDB) GetOrders(ctx context.Context) {
 
 }
+
 func order_Test(
 	ctx context.Context,
 	repo *RedisDB,

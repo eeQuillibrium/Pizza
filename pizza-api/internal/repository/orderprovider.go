@@ -27,7 +27,7 @@ func (r *OPRepo) StoreOrder(
 	log.Print("try to store order in redis...")
 
 	orderkey := fmt.Sprintf("order:%d", 10e8+rand.Intn(9*10e8-1))
-	
+
 	err := r.repo.HSet(
 		ctx,
 		orderkey,
@@ -35,17 +35,14 @@ func (r *OPRepo) StoreOrder(
 		"price", order.Price,
 	).Err()
 	if err != nil {
-		log.Print("unsuccessful order creation")
+		log.Print("unsuccessful order storing")
 		return err
 	}
 
 	for i := 0; i < len(order.Units); i++ {
-		err := r.repo.HSet(
-			ctx,
-			orderkey,
-			order.Units[i].Unitnum,
-			order.Units[i].Piece,
-		).Err()
+		err := r.repo.HSet(ctx, orderkey,
+			fmt.Sprintf("unitnum%d", i), order.Units[i].Unitnum,
+			fmt.Sprintf("piece%d", i), order.Units[i].Piece).Err()
 		if err != nil {
 			log.Print("unsuccessful order creation")
 			return err

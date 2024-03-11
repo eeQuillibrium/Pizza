@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log"
 
 	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
 	"github.com/eeQuillibrium/pizza-api/internal/repository"
@@ -26,7 +27,7 @@ func (s *OPService) ProvideOrder(
 		UserId: in.Userid,
 		Price:  in.Price,
 	}
-
+	log.Print("provide order with units")
 	for i := 0; i < len(in.Units); i++ {
 		order.Units = append(order.Units,
 			models.PieceUnitnum{

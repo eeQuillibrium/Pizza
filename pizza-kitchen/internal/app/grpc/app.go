@@ -8,7 +8,7 @@ import (
 
 	nikita_kitchen1 "github.com/eeQuillibrium/protos/gen/go/kitchen"
 
-	"github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc/ordersender"
+	grpcclient "github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc/client"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc/server"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/service"
 	"google.golang.org/grpc"
@@ -35,7 +35,7 @@ func New(
 	//grpcPortDel int,
 ) *GRPCApp {
 	orderConn := setConn(portClientAPI)
-	orderSender := ordersender.New(orderConn)
+	client := grpcclient.NewOS(orderConn)
 
 	grpcServAPI := grpc.NewServer()
 	server.Register(grpcServAPI, kAPIService)
@@ -43,7 +43,7 @@ func New(
 	return &GRPCApp{
 		portServAPI: portServAPI,
 		grpcServAPI: grpcServAPI,
-		OrderSender: orderSender,
+		OrderSender: client,
 	}
 }
 

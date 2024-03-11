@@ -1,4 +1,4 @@
-package ordersender
+package grpcclient
 
 import (
 	"context"
@@ -8,19 +8,20 @@ import (
 	"google.golang.org/grpc"
 )
 
-type OrderSender struct {
+type OrderSenderClient struct {
 	grpcClientAPI nikita_kitchen1.KitchenClient
 	grpcConnAPI   *grpc.ClientConn
 }
 
-func New(grpcConnAPI *grpc.ClientConn) *OrderSender {
+func NewOS(grpcConnAPI *grpc.ClientConn) *OrderSenderClient {
 	grpcClientAPI := nikita_kitchen1.NewKitchenClient(grpcConnAPI)
-	return &OrderSender{
+	return &OrderSenderClient{
 		grpcClientAPI: grpcClientAPI,
 		grpcConnAPI:   grpcConnAPI,
 	}
 }
-func (g *OrderSender) SendOrder(
+
+func (g *OrderSenderClient) SendOrder(
 	ctx context.Context,
 	in *nikita_kitchen1.SendOrderReq,
 ) (*nikita_kitchen1.EmptyOrderResp, error) {

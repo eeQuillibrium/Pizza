@@ -1,4 +1,4 @@
-package grpckitchen
+package client
 
 import (
 	"context"
@@ -8,25 +8,25 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Kitchen struct {
+type KitchenClient struct {
 	gRPCClient nikita_kitchen1.KitchenClient
 	conn       *grpc.ClientConn
 	port       int
 }
 
-func New(
+func NewKitchen(
 	port int,
 	conn *grpc.ClientConn,
-) *Kitchen {
+) *KitchenClient {
 	gRPCClient := nikita_kitchen1.NewKitchenClient(conn)
-	return &Kitchen{
+	return &KitchenClient{
 		gRPCClient,
 		conn,
 		port,
 	}
 }
 
-func (k *Kitchen) SendOrder(
+func (k *KitchenClient) SendOrder(
 	ctx context.Context,
 	in *nikita_kitchen1.SendOrderReq,
 ) (*nikita_kitchen1.EmptyOrderResp, error) {
@@ -39,6 +39,6 @@ func (k *Kitchen) SendOrder(
 	return &nikita_kitchen1.EmptyOrderResp{}, nil
 }
 
-func (k *Kitchen) Stop() {
+func (k *KitchenClient) Stop() {
 	k.conn.Close()
 }

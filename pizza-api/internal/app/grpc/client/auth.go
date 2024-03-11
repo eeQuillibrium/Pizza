@@ -1,4 +1,4 @@
-package grpcauth
+package client
 
 import (
 	"context"
@@ -12,25 +12,25 @@ const (
 	emptyInt = 0
 )
 
-type GRPCAuth struct {
+type AuthClient struct {
 	gRPCClient nikita_auth1.AuthClient
 	conn       *grpc.ClientConn
 	port       int
 }
 
-func New(
+func NewAuth(
 	port int,
 	conn *grpc.ClientConn,
-) *GRPCAuth {
+) *AuthClient {
 	gRPCClient := nikita_auth1.NewAuthClient(conn)
-	return &GRPCAuth{
+	return &AuthClient{
 		gRPCClient,
 		conn,
 		port,
 	}
 }
 
-func (g *GRPCAuth) Register(
+func (g *AuthClient) Register(
 	ctx context.Context,
 	in *nikita_auth1.RegRequest,
 ) (int64, error) {
@@ -44,7 +44,7 @@ func (g *GRPCAuth) Register(
 
 	return r.GetUserId(), nil
 }
-func (g *GRPCAuth) Login(
+func (g *AuthClient) Login(
 	ctx context.Context,
 	in *nikita_auth1.LoginRequest,
 ) (string, error) {
@@ -56,13 +56,13 @@ func (g *GRPCAuth) Login(
 
 	return r.GetToken(), nil
 }
-func (g *GRPCAuth) IsAdmin(
+func (g *AuthClient) IsAdmin(
 	ctx context.Context,
 	in *nikita_auth1.IsAdminRequest,
 ) (bool, error) {
 	return true, nil
 }
 
-func (g *GRPCAuth) Stop() {
+func (g *AuthClient) Stop() {
 	g.conn.Close()
 }

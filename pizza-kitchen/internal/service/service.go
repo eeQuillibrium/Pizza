@@ -7,8 +7,8 @@ import (
 	nikita_kitchen1 "github.com/eeQuillibrium/protos/gen/go/kitchen"
 )
 
-type KitchenAPI interface {
-	SendMessage(
+type OrderProvider interface {
+	ProvideOrder(
 		ctx context.Context,
 		in *nikita_kitchen1.SendOrderReq,
 	) error
@@ -18,18 +18,18 @@ type Kitchen interface {
 }
 
 type KitchenRedisService interface {
-	KitchenAPI
+	OrderProvider
 	Kitchen
 }
 
 type Service struct {
-	KitchenAPI
+	OrderProvider
 	Kitchen
 }
 
 func New(repo *repository.Repository) *Service {
 	return &Service{
-		KitchenAPI: NewKitchenAPIService(repo.KitchenRedisDB),
+		OrderProvider: NewOPService(repo.KitchenRedisDB),
 		Kitchen:    NewKitchenService(repo.KitchenRedisDB),
 	}
 }

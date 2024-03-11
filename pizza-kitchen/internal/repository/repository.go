@@ -7,18 +7,19 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type KitchenAPI interface {
+type OrderProvider interface {
 	StoreOrder(
 		ctx context.Context,
 		order *models.Order,
 	) error
 }
+
 type Kitchen interface {
 	GetOrders(ctx context.Context,)
 }
 
 type KitchenRedisDB interface {
-	KitchenAPI
+	OrderProvider
 	Kitchen
 }
 

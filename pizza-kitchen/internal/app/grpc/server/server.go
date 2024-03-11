@@ -6,16 +6,15 @@ import (
 	"google.golang.org/grpc"
 )
 
-
 // implemented all service func (handlers)
 type serverAPI struct {
 	nikita_kitchen1.UnimplementedKitchenServer
-	kitchenAPI service.KitchenAPI // service
+	orderProvider service.OrderProvider // service for KitchenServer
 }
 
 func Register(
 	serv *grpc.Server,
-	service service.KitchenAPI,
+	orderProviderService service.OrderProvider,
 ) {
-	nikita_kitchen1.RegisterKitchenServer(serv, &serverAPI{kitchenAPI: service})
+	nikita_kitchen1.RegisterKitchenServer(serv, &serverAPI{orderProvider: orderProviderService})
 }

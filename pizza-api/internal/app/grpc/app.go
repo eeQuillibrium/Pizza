@@ -6,8 +6,7 @@ import (
 	"log"
 	"net"
 
-	grpcauth "github.com/eeQuillibrium/pizza-api/internal/app/grpc/auth"
-	grpckitchen "github.com/eeQuillibrium/pizza-api/internal/app/grpc/kitchen"
+	"github.com/eeQuillibrium/pizza-api/internal/app/grpc/client"
 	grpcserver "github.com/eeQuillibrium/pizza-api/internal/app/grpc/server"
 	"github.com/eeQuillibrium/pizza-api/internal/service"
 	nikita_auth1 "github.com/eeQuillibrium/protos/gen/go/auth"
@@ -54,12 +53,12 @@ func New(
 	log.Print("trying to set connection with authgrpc server...")
 
 	authconn := setConn(authport)
-	auth := grpcauth.New(authport, authconn)
+	auth := client.NewAuth(authport, authconn)
 	log.Print("authgrpc connect successful!")
 
 	log.Print("trying to set connection with kitchen server...")
 	kitchenconn := setConn(kitchenport)
-	kitchen := grpckitchen.New(kitchenport, kitchenconn)
+	kitchen := client.NewKitchen(kitchenport, kitchenconn)
 	log.Print("kitchen connect successful!")
 
 	serv := grpc.NewServer()
