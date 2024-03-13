@@ -3,6 +3,7 @@ package handler
 import (
 	grpcapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/service"
+	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
@@ -18,4 +19,13 @@ func New(
 		gRPCApp: gRPCApp,
 		service: service,
 	}
+}
+
+func (h *Handler) InitRoutes() *gin.Engine {
+	router := gin.Default()
+
+	router.GET("/orders/get", h.ordersGetHandler)
+	router.GET("/orders/exec", h.ordersExecHandler)
+
+	return router
 }

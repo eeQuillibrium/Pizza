@@ -2,14 +2,13 @@ package client
 
 import (
 	"context"
-	"log"
 
-	nikita_kitchen1 "github.com/eeQuillibrium/protos/gen/go/kitchen"
+	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 	"google.golang.org/grpc"
 )
 
 type KitchenClient struct {
-	gRPCClient nikita_kitchen1.KitchenClient
+	gRPCClient grpc_orders.OrderingClient
 	conn       *grpc.ClientConn
 	port       int
 }
@@ -18,7 +17,7 @@ func NewKitchen(
 	port int,
 	conn *grpc.ClientConn,
 ) *KitchenClient {
-	gRPCClient := nikita_kitchen1.NewKitchenClient(conn)
+	gRPCClient := grpc_orders.NewOrderingClient(conn)
 	return &KitchenClient{
 		gRPCClient,
 		conn,
@@ -28,15 +27,12 @@ func NewKitchen(
 
 func (k *KitchenClient) SendOrder(
 	ctx context.Context,
-	in *nikita_kitchen1.SendOrderReq,
-) (*nikita_kitchen1.EmptyOrderResp, error) {
-	log.Print("try to proceeds req with kitchen...")
+	in *grpc_orders.SendOrderReq,
+) (*grpc_orders.EmptyOrderResp, error) {
+
 	_, err := k.gRPCClient.SendOrder(ctx, in)
-	if err != nil {
-		log.Fatalf("sendorder grpc req err: %v", err)
-	}
-	log.Print("empty order was gotten!")
-	return &nikita_kitchen1.EmptyOrderResp{}, nil
+
+	return &grpc_orders.EmptyOrderResp{}, err
 }
 
 func (k *KitchenClient) Stop() {

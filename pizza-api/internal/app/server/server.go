@@ -5,13 +5,17 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/eeQuillibrium/pizza-api/internal/logger"
 )
 
 type Server struct {
+	log    *logger.Logger
 	server *http.Server
 }
 
 func New(
+	log *logger.Logger,
 	restport int,
 	router http.Handler,
 ) *Server {
@@ -23,10 +27,13 @@ func New(
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	return &Server{server}
+	return &Server{
+		log:    log,
+		server: server,
+	}
 }
 func (s *Server) Run() {
-	log.Printf("run rest server on %s", s.server.Addr)
+	s.log.SugaredLogger.Infof("run rest server on %s", s.server.Addr)
 	if err := s.server.ListenAndServe(); err != nil {
 		log.Fatalf("server running problem: %v", err)
 	}

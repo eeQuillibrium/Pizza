@@ -1,12 +1,12 @@
 package models
 
 type Order struct {
-	UserId int64          `json:"userid"`
-	Price  int64          `json:"price"`
+	UserId int            `json:"userid"`
+	Price  int            `json:"price"`
 	Units  []PieceUnitnum `json:"units"`
 }
 
 type PieceUnitnum struct {
-	Piece   int64 `json:"piece"`
-	Unitnum int64 `json:"unitnum"`
+	Piece   int `json:"piece"`
+	Unitnum int `json:"unitnum"`
 }

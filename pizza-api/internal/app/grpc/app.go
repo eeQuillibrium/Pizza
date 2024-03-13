@@ -3,14 +3,14 @@ package grpcapp
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 
 	"github.com/eeQuillibrium/pizza-api/internal/app/grpc/client"
 	grpcserver "github.com/eeQuillibrium/pizza-api/internal/app/grpc/server"
+	"github.com/eeQuillibrium/pizza-api/internal/logger"
 	"github.com/eeQuillibrium/pizza-api/internal/service"
 	nikita_auth1 "github.com/eeQuillibrium/protos/gen/go/auth"
-	nikita_kitchen1 "github.com/eeQuillibrium/protos/gen/go/kitchen"
+	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -31,50 +31,56 @@ type Auth interface {
 	) (bool, error)
 }
 
-type Kitchen interface {
+type OrderSender interface {
 	SendOrder(
 		ctx context.Context,
-		in *nikita_kitchen1.SendOrderReq,
-	) (*nikita_kitchen1.EmptyOrderResp, error)
+		in *grpc_orders.SendOrderReq,
+	) (*grpc_orders.EmptyOrderResp, error)
 }
 
 type GRPCApp struct {
-	Auth        Auth
-	Kitchen     Kitchen
-	OrderServer *grpc.Server
+	log                *logger.Logger
+	Auth               Auth
+	KitchenOrderSender OrderSender
+	OrderServer        *grpc.Server
 	//other grpc
 }
 
 func New(
+	log *logger.Logger,
 	authport int,
 	kitchenport int,
 	kService service.OrderProvider,
 ) *GRPCApp {
-	log.Print("trying to set connection with authgrpc server...")
+	log.SugaredLogger.Info("trying to set connection with authgrpc server...")
 
-	authconn := setConn(authport)
+	authconn := setConn(log, authport)
 	auth := client.NewAuth(authport, authconn)
-	log.Print("authgrpc connect successful!")
+	log.SugaredLogger.Info("authgrpc connect successful!")
 
-	log.Print("trying to set connection with kitchen server...")
-	kitchenconn := setConn(kitchenport)
-	kitchen := client.NewKitchen(kitchenport, kitchenconn)
-	log.Print("kitchen connect successful!")
+	log.SugaredLogger.Info("trying to set connection with kitchen server...")
+	kitchenconn := setConn(log, kitchenport)
+	kitchenOrderSender := client.NewKitchen(kitchenport, kitchenconn)
+	log.SugaredLogger.Info("kitchen connect successful!")
 
 	serv := grpc.NewServer()
 	grpcserver.Register(serv, kService)
 
 	return &GRPCApp{
-		Auth:        auth,
-		Kitchen:     kitchen,
-		OrderServer: serv,
+		log:                log,
+		Auth:               auth,
+		KitchenOrderSender: kitchenOrderSender,
+		OrderServer:        serv,
 	}
 }
 
-func setConn(port int) *grpc.ClientConn {
+func setConn(
+	log *logger.Logger,
+	port int,
+) *grpc.ClientConn {
 	conn, err := grpc.Dial(fmt.Sprintf("localhost:%v", port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("failed to connect with auth service: %v", err)
+		log.SugaredLogger.Fatalf("failed to connect with auth service: %w", err)
 	}
 	return conn
 }
@@ -82,16 +88,16 @@ func setConn(port int) *grpc.ClientConn {
 func (a *GRPCApp) Run(
 	orderPort int,
 ) {
-	log.Printf("try to run grpc kitchenapi serv on %s", fmt.Sprintf(":%d", orderPort))
+	a.log.SugaredLogger.Infof("try to run grpc kitchenapi serv on %s", fmt.Sprintf(":%d", orderPort))
 
 	lst, err := net.Listen("tcp", fmt.Sprintf(":%d", orderPort))
 
 	if err != nil {
-		log.Fatalf("listen was dropped")
+		a.log.SugaredLogger.Fatal("listen was dropped")
 	}
 
 	if err := a.OrderServer.Serve(lst); err != nil {
-		log.Fatalf("serving was dropped")
+		a.log.SugaredLogger.Fatal("serving was dropped")
 	}
 }
 

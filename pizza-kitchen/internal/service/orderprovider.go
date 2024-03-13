@@ -2,12 +2,11 @@ package service
 
 import (
 	"context"
-	"log"
 
 	"github.com/eeQuillibrium/pizza-kitchen/internal/domain/models"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/repository"
 
-	nikita_kitchen1 "github.com/eeQuillibrium/protos/gen/go/kitchen"
+	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 )
 
 type OPService struct {
@@ -22,13 +21,13 @@ func NewOPService(
 
 func (s *OPService) ProvideOrder(
 	ctx context.Context,
-	in *nikita_kitchen1.SendOrderReq,
+	in *grpc_orders.SendOrderReq,
 ) error {
 	order := &models.Order{
 		UserId: int(in.Userid),
 		Price:  int(in.Price),
 	}
-	log.Print("try to store order", in.Units)
+
 	for i := 0; i < len(in.Units); i++ {
 		order.Units = append(order.Units,
 			models.PieceUnitnum{
@@ -37,11 +36,5 @@ func (s *OPService) ProvideOrder(
 			})
 	}
 
-	err := s.repo.StoreOrder(ctx, order)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return s.repo.StoreOrder(ctx, order)
 }

@@ -4,17 +4,17 @@ import (
 	"context"
 	"log"
 
-	nikita_kitchen1 "github.com/eeQuillibrium/protos/gen/go/kitchen"
+	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 	"google.golang.org/grpc"
 )
 
 type OrderSenderClient struct {
-	grpcClientAPI nikita_kitchen1.KitchenClient
+	grpcClientAPI grpc_orders.OrderingClient
 	grpcConnAPI   *grpc.ClientConn
 }
 
 func NewOS(grpcConnAPI *grpc.ClientConn) *OrderSenderClient {
-	grpcClientAPI := nikita_kitchen1.NewKitchenClient(grpcConnAPI)
+	grpcClientAPI := grpc_orders.NewOrderingClient(grpcConnAPI)
 	return &OrderSenderClient{
 		grpcClientAPI: grpcClientAPI,
 		grpcConnAPI:   grpcConnAPI,
@@ -23,8 +23,8 @@ func NewOS(grpcConnAPI *grpc.ClientConn) *OrderSenderClient {
 
 func (g *OrderSenderClient) SendOrder(
 	ctx context.Context,
-	in *nikita_kitchen1.SendOrderReq,
-) (*nikita_kitchen1.EmptyOrderResp, error) {
+	in *grpc_orders.SendOrderReq,
+) (*grpc_orders.EmptyOrderResp, error) {
 	log.Printf("trying to proceed by ordersender")
 
 	r, err := g.grpcClientAPI.SendOrder(ctx, in)

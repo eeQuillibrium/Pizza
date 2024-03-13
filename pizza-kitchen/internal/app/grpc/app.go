@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	nikita_kitchen1 "github.com/eeQuillibrium/protos/gen/go/kitchen"
+	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 
 	grpcclient "github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc/client"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc/server"
@@ -18,14 +18,14 @@ import (
 type OrderSender interface {
 	SendOrder(
 		ctx context.Context,
-		in *nikita_kitchen1.SendOrderReq,
-	) (*nikita_kitchen1.EmptyOrderResp, error)
+		in *grpc_orders.SendOrderReq,
+	) (*grpc_orders.EmptyOrderResp, error)
 }
 
 type GRPCApp struct {
 	portServAPI int
 	grpcServAPI *grpc.Server
-	OrderSender
+	APIOrderSender OrderSender
 }
 
 func New(
@@ -35,7 +35,7 @@ func New(
 	//grpcPortDel int,
 ) *GRPCApp {
 	orderConn := setConn(portClientAPI)
-	client := grpcclient.NewOS(orderConn)
+	apiClient := grpcclient.NewOS(orderConn)
 
 	grpcServAPI := grpc.NewServer()
 	server.Register(grpcServAPI, kAPIService)
@@ -43,7 +43,7 @@ func New(
 	return &GRPCApp{
 		portServAPI: portServAPI,
 		grpcServAPI: grpcServAPI,
-		OrderSender: client,
+		APIOrderSender: apiClient,
 	}
 }
 

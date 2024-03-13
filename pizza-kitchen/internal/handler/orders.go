@@ -4,25 +4,38 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"net/http"
+	"log"
 	"time"
 
-	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
 	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
+	"github.com/gin-gonic/gin"
+
+	"github.com/eeQuillibrium/pizza-kitchen/internal/domain/models"
 )
 
-func (h *Handler) OrdersHandler(w http.ResponseWriter, r *http.Request) {
-	h.log.SugaredLogger.Infof("order request, method: %s", r.Method)
-}
+func (h *Handler) ordersGetHandler(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 
-func (h *Handler) OrdersExecHandler(w http.ResponseWriter, r *http.Request) {
-
-	b, err := io.ReadAll(r.Body)
+	orders, err := h.service.Kitchen.GetOrders(ctx)
 	if err != nil {
-		h.log.SugaredLogger.Fatalf("order json reading problem: %w", err)
+		log.Printf("getorders problem: %v", err)
+	}
+
+	jsonString, err := json.Marshal(orders)
+	if err != nil {
+		log.Printf("json marshaling problem occured: %v", err)
+	}
+
+	c.Writer.Write(jsonString)
+}
+func (h *Handler) ordersExecHandler(c *gin.Context) {
+	b, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Fatalf("order json reading problem: %v", err)
 	}
 	if len(b) == 0 {
-		h.log.SugaredLogger.Fatal("empty req body")
+		log.Fatal("empty req body")
 	}
 
 	var order models.Order
@@ -31,7 +44,7 @@ func (h *Handler) OrdersExecHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err = h.GRPCApp.KitchenOrderSender.SendOrder(
+	_, err = h.gRPCApp.APIOrderSender.SendOrder(
 		ctx,
 		&grpc_orders.SendOrderReq{
 			Units:  orderUnitsAccessor(&order),
@@ -40,12 +53,11 @@ func (h *Handler) OrdersExecHandler(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		h.log.SugaredLogger.Fatalf("error with sendorder: %w", err)
+		log.Fatalf("error with sendorder: %v", err)
 	}
 
-	h.log.SugaredLogger.Info("successful sendorder execution")
+	log.Print("successful sendorder execution")
 }
-
 func orderUnitsAccessor(order *models.Order) []*grpc_orders.SendOrderReq_PieceUnitnum {
 	units := []*grpc_orders.SendOrderReq_PieceUnitnum{}
 	for i := 0; i < len(order.Units); i++ {

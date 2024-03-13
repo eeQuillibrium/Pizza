@@ -3,18 +3,19 @@ package service
 import (
 	"context"
 
+	"github.com/eeQuillibrium/pizza-kitchen/internal/domain/models"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/repository"
-	nikita_kitchen1 "github.com/eeQuillibrium/protos/gen/go/kitchen"
+	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 )
 
 type OrderProvider interface {
 	ProvideOrder(
 		ctx context.Context,
-		in *nikita_kitchen1.SendOrderReq,
+		in *grpc_orders.SendOrderReq,
 	) error
 }
 type Kitchen interface {
-	GetOrders()
+	GetOrders(ctx context.Context) ([]*models.Order, error)
 }
 
 type KitchenRedisService interface {
@@ -30,6 +31,6 @@ type Service struct {
 func New(repo *repository.Repository) *Service {
 	return &Service{
 		OrderProvider: NewOPService(repo.KitchenRedisDB),
-		Kitchen:    NewKitchenService(repo.KitchenRedisDB),
+		Kitchen:       NewKitchenService(repo.KitchenRedisDB),
 	}
 }

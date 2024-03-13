@@ -11,21 +11,22 @@ import (
 )
 
 type RedisDB struct {
-	Client *redis.Client
+	rClient *redis.Client
 }
 
-func NewRedisDB(client *redis.Client) *RedisDB {
-	return &RedisDB{Client: client}
+func NewRedisDB(rClient *redis.Client) *RedisDB {
+	return &RedisDB{rClient: rClient}
 }
 
 func (r *RedisDB) StoreOrder(
 	ctx context.Context,
 	order *models.Order,
 ) error {
-	log.Print("try to store order in redis...")
+	log.Print("try to store order in redis")
 
 	orderkey := fmt.Sprintf("order:%d", 10e8+rand.Intn(9*10e8-1))
-	err := r.Client.HSet(
+
+	err := r.rClient.HSet(
 		ctx,
 		orderkey,
 		"userid", order.UserId,
@@ -37,7 +38,7 @@ func (r *RedisDB) StoreOrder(
 	}
 
 	for i := 0; i < len(order.Units); i++ {
-		err := r.Client.HSet(ctx, orderkey,
+		err := r.rClient.HSet(ctx, orderkey,
 			fmt.Sprintf("unitnum%d", i), order.Units[i].Unitnum,
 			fmt.Sprintf("piece%d", i), order.Units[i].Piece).Err()
 		if err != nil {
@@ -48,19 +49,9 @@ func (r *RedisDB) StoreOrder(
 
 	log.Print("successful order storing!")
 
-	order_Test(ctx, r, orderkey)
-
 	return nil
 }
-func (r *RedisDB) GetOrders(ctx context.Context) {
 
-}
-
-func order_Test(
-	ctx context.Context,
-	repo *RedisDB,
-	orderkey string,
-) {
-	record := repo.Client.HGetAll(ctx, orderkey)
-	log.Println(record)
+func (r *RedisDB) GetOrders(ctx context.Context) ([]*models.Order, error) {
+	return nil, nil
 }

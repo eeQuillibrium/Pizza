@@ -2,37 +2,43 @@ package service
 
 import (
 	"context"
-	"log"
 
 	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
+	"github.com/eeQuillibrium/pizza-api/internal/logger"
 	"github.com/eeQuillibrium/pizza-api/internal/repository"
-	nikita_kitchen1 "github.com/eeQuillibrium/protos/gen/go/kitchen"
+	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 )
 
 type OPService struct {
+	log  *logger.Logger
 	repo repository.OrderProvider
 }
 
 func NewOPService(
+	log *logger.Logger,
 	repo repository.OrderProvider,
 ) *OPService {
-	return &OPService{repo: repo}
+
+	return &OPService{
+		log:  log,
+		repo: repo,
+	}
 }
 func (s *OPService) ProvideOrder(
 	ctx context.Context,
-	in *nikita_kitchen1.SendOrderReq,
+	in *grpc_orders.SendOrderReq,
 ) error {
 
 	order := &models.Order{
-		UserId: in.Userid,
-		Price:  in.Price,
+		UserId: int(in.Userid),
+		Price:  int(in.Price),
 	}
-	log.Print("provide order with units")
+
 	for i := 0; i < len(in.Units); i++ {
 		order.Units = append(order.Units,
 			models.PieceUnitnum{
-				Unitnum: in.Units[i].Unitnum,
-				Piece:   in.Units[i].Piece,
+				Unitnum: int(in.Units[i].Unitnum),
+				Piece:   int(in.Units[i].Piece),
 			})
 	}
 

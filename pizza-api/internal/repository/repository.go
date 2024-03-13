@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
+	"github.com/eeQuillibrium/pizza-api/internal/logger"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -19,6 +20,11 @@ type Repository struct {
 	OrderProvider
 }
 
-func New(rClient *redis.Client) *Repository {
-	return &Repository{NewOPRepo(rClient)}
+func New(
+	log *logger.Logger,
+	rClient *redis.Client,
+) *Repository {
+	return &Repository{
+		OrderProvider: NewOPRepo(log, rClient),
+	}
 }

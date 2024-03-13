@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"log"
 
 	nikita_auth1 "github.com/eeQuillibrium/protos/gen/go/auth"
 	"google.golang.org/grpc"
@@ -34,14 +33,10 @@ func (g *AuthClient) Register(
 	ctx context.Context,
 	in *nikita_auth1.RegRequest,
 ) (int64, error) {
-
-	log.Printf("trying to proceed user(api): %s, %s", in.GetLogin(), in.GetPass())
 	r, err := g.gRPCClient.Register(ctx, in)
 	if err != nil {
-		log.Fatalf("client grpc in auth(Register): %v", err)
 		return emptyInt, err
 	}
-
 	return r.GetUserId(), nil
 }
 func (g *AuthClient) Login(
@@ -50,7 +45,6 @@ func (g *AuthClient) Login(
 ) (string, error) {
 	r, err := g.gRPCClient.Login(ctx, in)
 	if err != nil {
-		log.Fatalf("client grpc in auth(Login): %v", err)
 		return "", err
 	}
 
