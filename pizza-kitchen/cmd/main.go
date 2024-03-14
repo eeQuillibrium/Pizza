@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -28,18 +29,18 @@ func main() {
 
 	cfg := config.New()
 
-	client := redis.NewClient(&redis.Options{
+	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("localhost:%d", cfg.Repo.Redis.Port),
 		Password: cfg.Repo.Redis.Password,
 		DB:       cfg.Repo.Redis.DB,
 	})
 
-	repo := repository.New(client)
+	repo := repository.New(rdb)
 	service := service.New(repo)
 	grpcApp := grpcapp.New(
-		log, 
-		cfg.GRPC.Kitchenapi.Client.Port, 
-		cfg.GRPC.Kitchenapi.Server.Port, 
+		log,
+		cfg.GRPC.Kitchenapi.Client.Port,
+		cfg.GRPC.Kitchenapi.Server.Port,
 		service,
 	)
 	handl := handler.New(log, grpcApp, service)
@@ -50,7 +51,6 @@ func main() {
 	go app.Run()
 
 	stop := make(chan os.Signal, 1)
-
 	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
 	sign := <-stop
@@ -58,4 +58,7 @@ func main() {
 	log.SugaredLogger.Infof("try to stop program with %v", sign)
 
 	app.GracefulStop()
+	if err := rdb.ShutdownSave(context.Background()).Err(); err != nil {
+		log.SugaredLogger.Infof("error with rdb shutdown : %w", err)
+	}
 }

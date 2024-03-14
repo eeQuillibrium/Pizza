@@ -1,8 +1,8 @@
 package server
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -10,7 +10,6 @@ import (
 )
 
 type Server struct {
-	log    *logger.Logger
 	server *http.Server
 }
 
@@ -28,13 +27,12 @@ func New(
 	}
 
 	return &Server{
-		log:    log,
 		server: server,
 	}
 }
-func (s *Server) Run() {
-	s.log.SugaredLogger.Infof("run rest server on %s", s.server.Addr)
-	if err := s.server.ListenAndServe(); err != nil {
-		log.Fatalf("server running problem: %v", err)
-	}
+func (s *Server) Run() error {
+	return s.server.ListenAndServe()
+}
+func (s *Server) Stop(ctx context.Context) error {
+	return s.server.Shutdown(ctx)
 }
