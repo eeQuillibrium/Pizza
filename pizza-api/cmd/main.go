@@ -16,10 +16,10 @@ import (
 )
 
 func main() {
-	logger := logger.New() //some cfg params
+	log := logger.New() //some cfg params
 
 	if err := godotenv.Load(); err != nil {
-		logger.Fatalf(".env reading err: %v", err)
+		log.Fatalf(".env reading err: %v", err)
 	}
 
 	cfg := config.New()
@@ -30,11 +30,11 @@ func main() {
 		DB:       cfg.Repo.Redis.DB,
 	})
 
-	repo := repository.New(logger, client)
-	services := service.New(logger, repo)
-	handl := handler.New(logger, cfg.GRPC.Auth.Port, cfg.GRPC.Kitchen.Port, services)
+	repo := repository.New(log, client)
+	services := service.New(log, repo)
+	handl := handler.New(log, services, cfg.GRPC.Auth.Port, cfg.GRPC.Kitchen.Port, services)
 
-	RESTServ := server.New(logger, cfg.Server.Port, handl.InitRoutes())
+	RESTServ := server.New(log, cfg.Server.Port, handl.InitRoutes())
 
 	app := app.New(RESTServ, handl.GRPCApp)
 

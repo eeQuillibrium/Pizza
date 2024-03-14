@@ -2,20 +2,24 @@ package handler
 
 import (
 	grpcapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc"
+	"github.com/eeQuillibrium/pizza-kitchen/internal/logger"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
+	log     *logger.Logger
 	gRPCApp *grpcapp.GRPCApp
 	service *service.Service
 }
 
 func New(
+	log     *logger.Logger,
 	gRPCApp *grpcapp.GRPCApp,
 	service *service.Service,
 ) *Handler {
 	return &Handler{
+		log: log,
 		gRPCApp: gRPCApp,
 		service: service,
 	}

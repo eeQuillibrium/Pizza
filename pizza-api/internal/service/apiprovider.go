@@ -5,24 +5,29 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/eeQuillibrium/pizza-kitchen/internal/domain/models"
-	"github.com/eeQuillibrium/pizza-kitchen/internal/repository"
+	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
+	"github.com/eeQuillibrium/pizza-api/internal/logger"
+	"github.com/eeQuillibrium/pizza-api/internal/repository"
 )
 
-type KitchenService struct {
-	repo repository.Kitchen
+type APIPService struct {
+	log  *logger.Logger
+	repo repository.APIProvider
 }
 
-func NewKitchenService(
-	repo repository.Kitchen,
-) *KitchenService {
-	return &KitchenService{repo: repo}
+func NewAPIPService(
+	log *logger.Logger,
+	repo repository.APIProvider,
+) *APIPService {
+	return &APIPService{
+		log:  log,
+		repo: repo,
+	}
 }
-func (s *KitchenService) GetOrders(
+func (s *APIPService) GetOrders(
 	ctx context.Context,
 ) ([]*models.Order, error) {
 	orders := s.repo.GetOrders(ctx)
-	
 	res := []*models.Order{}
 	for i := 0; i < len(orders); i++ {
 		order, err := getOrder(orders[i])

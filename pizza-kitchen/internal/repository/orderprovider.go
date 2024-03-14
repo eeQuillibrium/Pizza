@@ -3,26 +3,27 @@ package repository
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/rand"
 
 	"github.com/eeQuillibrium/pizza-kitchen/internal/domain/models"
 	"github.com/redis/go-redis/v9"
 )
 
-type RedisDB struct {
+type OPRepo struct {
 	rClient *redis.Client
 }
 
-func NewRedisDB(rClient *redis.Client) *RedisDB {
-	return &RedisDB{rClient: rClient}
+func NewOPRepo(
+	rClient *redis.Client,
+) *OPRepo {
+	return &OPRepo{
+		rClient: rClient,
+	}
 }
-
-func (r *RedisDB) StoreOrder(
+func (r *OPRepo) StoreOrder(
 	ctx context.Context,
 	order *models.Order,
 ) error {
-	log.Print("try to store order in redis")
 
 	orderkey := fmt.Sprintf("order:%d", 10e8+rand.Intn(9*10e8-1))
 
@@ -31,9 +32,9 @@ func (r *RedisDB) StoreOrder(
 		orderkey,
 		"userid", order.UserId,
 		"price", order.Price,
+		"len", len(order.Units),
 	).Err()
 	if err != nil {
-		log.Print("unsuccessful order storing")
 		return err
 	}
 
@@ -42,16 +43,9 @@ func (r *RedisDB) StoreOrder(
 			fmt.Sprintf("unitnum%d", i), order.Units[i].Unitnum,
 			fmt.Sprintf("piece%d", i), order.Units[i].Piece).Err()
 		if err != nil {
-			log.Print("unsuccessful order storing")
 			return err
 		}
 	}
 
-	log.Print("successful order storing!")
-
 	return nil
-}
-
-func (r *RedisDB) GetOrders(ctx context.Context) ([]*models.Order, error) {
-	return nil, nil
 }

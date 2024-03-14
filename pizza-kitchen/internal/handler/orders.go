@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"log"
 	"time"
 
 	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
@@ -19,23 +18,23 @@ func (h *Handler) ordersGetHandler(c *gin.Context) {
 
 	orders, err := h.service.Kitchen.GetOrders(ctx)
 	if err != nil {
-		log.Printf("getorders problem: %v", err)
+		h.log.SugaredLogger.Infof("getorders problem: %w", err)
 	}
 
-	jsonString, err := json.Marshal(orders)
+	json, err := json.Marshal(orders)
 	if err != nil {
-		log.Printf("json marshaling problem occured: %v", err)
+		h.log.SugaredLogger.Infof("json marshaling problem occured: %w", err)
 	}
 
-	c.Writer.Write(jsonString)
+	c.Writer.Write(json)
 }
 func (h *Handler) ordersExecHandler(c *gin.Context) {
 	b, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		log.Fatalf("order json reading problem: %v", err)
+		h.log.SugaredLogger.Fatalf("order json reading problem: %w", err)
 	}
 	if len(b) == 0 {
-		log.Fatal("empty req body")
+		h.log.SugaredLogger.Fatal("empty req body")
 	}
 
 	var order models.Order
@@ -53,10 +52,10 @@ func (h *Handler) ordersExecHandler(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		log.Fatalf("error with sendorder: %v", err)
+		h.log.SugaredLogger.Fatalf("error with sendorder: %w", err)
 	}
 
-	log.Print("successful sendorder execution")
+	h.log.SugaredLogger.Info("successful sendorder execution")
 }
 func orderUnitsAccessor(order *models.Order) []*grpc_orders.SendOrderReq_PieceUnitnum {
 	units := []*grpc_orders.SendOrderReq_PieceUnitnum{}

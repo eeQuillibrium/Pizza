@@ -10,11 +10,11 @@ import (
 )
 
 type OPService struct {
-	repo repository.KitchenRedisDB
+	repo repository.OrderProvider
 }
 
 func NewOPService(
-	repo repository.KitchenRedisDB,
+	repo repository.OrderProvider,
 ) *OPService {
 	return &OPService{repo: repo}
 }

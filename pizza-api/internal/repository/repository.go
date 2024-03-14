@@ -16,8 +16,15 @@ type OrderProvider interface {
 	) error
 }
 
+type APIProvider interface {
+	GetOrders(
+		ctx context.Context,
+	) []map[string]string
+}
+
 type Repository struct {
 	OrderProvider
+	APIProvider
 }
 
 func New(
@@ -26,5 +33,6 @@ func New(
 ) *Repository {
 	return &Repository{
 		OrderProvider: NewOPRepo(log, rClient),
+		APIProvider: NewAPIPRepo(log, rClient),
 	}
 }

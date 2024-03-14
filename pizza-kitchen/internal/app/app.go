@@ -23,5 +23,10 @@ func New(
 
 func (a *App) Run() {
 	go a.GRPCApp.Run()
-	a.RESTServ.Run()
+	go a.RESTServ.Run()
+}
+
+func (a *App) GracefulStop() {
+	a.GRPCApp.Stop()
+	a.RESTServ.Stop()
 }

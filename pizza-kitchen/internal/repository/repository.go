@@ -15,20 +15,17 @@ type OrderProvider interface {
 }
 
 type Kitchen interface {
-	GetOrders(ctx context.Context) ([]*models.Order, error)
+	GetOrders(ctx context.Context) []map[string]string
 }
 
-type KitchenRedisDB interface {
+type Repository struct {
 	OrderProvider
 	Kitchen
 }
 
-type Repository struct {
-	KitchenRedisDB
-}
-
-func New(client *redis.Client) *Repository {
+func New(rClient *redis.Client) *Repository {
 	return &Repository{
-		KitchenRedisDB: NewRedisDB(client),
+		OrderProvider: NewOPRepo(rClient),
+		Kitchen: NewKitchenRepo(rClient),
 	}
 }

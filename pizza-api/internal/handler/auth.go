@@ -12,7 +12,7 @@ import (
 	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
 )
 
-func (h *Handler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 	h.log.SugaredLogger.Info("request for signUp...")
 
 	var u models.User
@@ -37,7 +37,7 @@ func (h *Handler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("user with id=%d was registered completely!", userId)))
 }
 
-func (h *Handler) SignInHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) signInHandler(w http.ResponseWriter, r *http.Request) {
 	h.log.SugaredLogger.Info("request for signIn...")
 
 	var u models.User

@@ -30,7 +30,7 @@ type Service struct {
 
 func New(repo *repository.Repository) *Service {
 	return &Service{
-		OrderProvider: NewOPService(repo.KitchenRedisDB),
-		Kitchen:       NewKitchenService(repo.KitchenRedisDB),
+		OrderProvider: NewOPService(repo.OrderProvider),
+		Kitchen:       NewKitchenService(repo.Kitchen),
 	}
 }

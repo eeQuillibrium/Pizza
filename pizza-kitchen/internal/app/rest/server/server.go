@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 )
@@ -26,13 +25,9 @@ func New(
 	return &Server{server}
 }
 
-func (s *Server) Run() {
-	err := s.httpServ.ListenAndServe()
-	if err != nil {
-		log.Fatalf("listen rest kitchen: %v", err)
-	}
-
+func (s *Server) Run() error {
+	return s.httpServ.ListenAndServe()
 }
-func Stop() {
-	
+func (s *Server) Stop() {
+	s.httpServ.Close()
 }

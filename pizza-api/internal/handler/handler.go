@@ -9,11 +9,13 @@ import (
 
 type Handler struct {
 	log     *logger.Logger
+	service *service.Service
 	GRPCApp *grpcapp.GRPCApp
 }
 
 func New(
 	log *logger.Logger,
+	service *service.Service,
 	authport int,
 	kitchenport int,
 	kService service.OrderProvider,
@@ -28,11 +30,11 @@ func New(
 func (h *Handler) InitRoutes() *mux.Router {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/orders", h.OrdersHandler)
-	r.HandleFunc("/orders/exec", h.OrdersExecHandler)
+	r.HandleFunc("/orders/get", h.ordersGetHandler)
+	r.HandleFunc("/orders/exec", h.ordersExecHandler)
 
-	r.HandleFunc("/auth/signUp", h.SignUpHandler)
-	r.HandleFunc("/auth/signIn", h.SignInHandler)
+	r.HandleFunc("/auth/signUp", h.signUpHandler)
+	r.HandleFunc("/auth/signIn", h.signInHandler)
 
 	return r
 }

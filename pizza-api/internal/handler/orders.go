@@ -11,12 +11,25 @@ import (
 	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 )
 
-func (h *Handler) OrdersHandler(w http.ResponseWriter, r *http.Request) {
-	h.log.SugaredLogger.Infof("order request, method: %s", r.Method)
+func (h *Handler) ordersGetHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	
+	orders, err := h.service.APIProvider.GetOrders(ctx)
+	if err != nil {
+		h.log.SugaredLogger.Fatalf("getting order problem %w", err)
+	}
+
+	json, err := json.Marshal(orders)
+	if err != nil {
+		h.log.SugaredLogger.Fatalf("marshaling problem %w", err)
+	}
+
+	w.Write(json)
+
+	h.log.SugaredLogger.Info("successful getOrders execution")
 }
 
-func (h *Handler) OrdersExecHandler(w http.ResponseWriter, r *http.Request) {
-
+func (h *Handler) ordersExecHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		h.log.SugaredLogger.Fatalf("order json reading problem: %w", err)

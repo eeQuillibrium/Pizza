@@ -2,26 +2,29 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/eeQuillibrium/pizza-kitchen/internal/app"
-	grpcapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc"
-	restapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/rest"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/config"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/handler"
+	"github.com/eeQuillibrium/pizza-kitchen/internal/logger"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/repository"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/service"
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
+
+	grpcapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc"
+	restapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/rest"
 )
 
 func main() {
+	log := logger.New()
 
 	if err := godotenv.Load(); err != nil {
-		log.Fatalf(".env reading err: %v", err)
+		log.Fatalf(".env reading err: %w", err)
 	}
-
-	log.Print("try to start...")
 
 	cfg := config.New()
 
@@ -33,14 +36,26 @@ func main() {
 
 	repo := repository.New(client)
 	service := service.New(repo)
-
-	grpcApp := grpcapp.New(cfg.GRPC.Kitchenapi.Client.Port, cfg.GRPC.Kitchenapi.Server.Port, service)
-	handl := handler.New(grpcApp, service)
-	restApp := restapp.New(cfg.REST.Port, handl.InitRoutes())
+	grpcApp := grpcapp.New(
+		log, 
+		cfg.GRPC.Kitchenapi.Client.Port, 
+		cfg.GRPC.Kitchenapi.Server.Port, 
+		service,
+	)
+	handl := handler.New(log, grpcApp, service)
+	restApp := restapp.New(log, cfg.REST.Port, handl.InitRoutes())
 
 	app := app.New(grpcApp, restApp)
 
-	app.Run()
+	go app.Run()
 
-	//Graceful shutdown
+	stop := make(chan os.Signal, 1)
+
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	sign := <-stop
+
+	log.SugaredLogger.Infof("try to stop program with %v", sign)
+
+	app.GracefulStop()
 }

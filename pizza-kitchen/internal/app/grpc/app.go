@@ -3,7 +3,6 @@ package grpcapp
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 
 	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
@@ -11,6 +10,7 @@ import (
 	grpcclient "github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc/client"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc/server"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/service"
+	"github.com/eeQuillibrium/pizza-kitchen/internal/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -23,24 +23,27 @@ type OrderSender interface {
 }
 
 type GRPCApp struct {
+	log *logger.Logger
 	portServAPI int
 	grpcServAPI *grpc.Server
 	APIOrderSender OrderSender
 }
 
 func New(
+	log *logger.Logger,
 	portClientAPI int,
 	portServAPI int,
 	kAPIService *service.Service,
 	//grpcPortDel int,
 ) *GRPCApp {
-	orderConn := setConn(portClientAPI)
+	orderConn := setConn(log, portClientAPI)
 	apiClient := grpcclient.NewOS(orderConn)
 
 	grpcServAPI := grpc.NewServer()
 	server.Register(grpcServAPI, kAPIService)
 
 	return &GRPCApp{
+		log: log,
 		portServAPI: portServAPI,
 		grpcServAPI: grpcServAPI,
 		APIOrderSender: apiClient,
@@ -49,30 +52,30 @@ func New(
 
 func (g *GRPCApp) Run() {
 
-	log.Print("try to run grpc kitchenapi serv...")
-
 	lst, err := net.Listen("tcp", fmt.Sprintf(":%d", g.portServAPI))
 
 	if err != nil {
-		log.Fatalf("listen was dropped")
+		g.log.SugaredLogger.Info("listen was dropped")
 	}
 
 	if err := g.grpcServAPI.Serve(lst); err != nil {
-		log.Fatalf("serving was dropped")
+		g.log.SugaredLogger.Info("serving was dropped")
 	}
 
 }
 
-func (a *GRPCApp) Stop() {
-	log.Printf("Stopping gRPC server %v...", a.portServAPI)
-	a.grpcServAPI.GracefulStop()
+func (g *GRPCApp) Stop() {
+	g.log.SugaredLogger.Infof("stopping gRPC server %v", g.portServAPI)
+	g.grpcServAPI.GracefulStop()
 }
 
-func setConn(port int) *grpc.ClientConn {
-	log.Printf("try to set connection on port %d", port)
-	conn, err := grpc.Dial(fmt.Sprintf("localhost:%v", port), grpc.WithTransportCredentials(insecure.NewCredentials()))
+func setConn(log *logger.Logger, port int) *grpc.ClientConn {
+	log.SugaredLogger.Infof("try to set connection on port %d", port)
+
+	conn, err := grpc.Dial(fmt.Sprintf("localhost:%d", port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Fatalf("failed to connect with auth service: %v", err)
+		log.SugaredLogger.Infof("failed to connect with auth service: %w", err)
 	}
+
 	return conn
 }

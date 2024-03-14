@@ -10,7 +10,7 @@ grpc:
   appnum: 1
 repo:
   redis:
-    port: 6378
+    port: 6379
     password: ""
     db: 0
   
