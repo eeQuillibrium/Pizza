@@ -27,6 +27,7 @@ func (h *Handler) ordersGetHandler(c *gin.Context) {
 	}
 
 	c.Writer.Write(json)
+	h.log.SugaredLogger.Info("successful getorders execution")
 }
 func (h *Handler) ordersExecHandler(c *gin.Context) {
 	b, err := io.ReadAll(c.Request.Body)
@@ -52,10 +53,10 @@ func (h *Handler) ordersExecHandler(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		h.log.SugaredLogger.Fatalf("error with sendorder: %w", err)
+		h.log.SugaredLogger.Fatalf("error with sendorder: %v", err)
 	}
 
-	h.log.SugaredLogger.Info("successful sendorder execution")
+	h.log.SugaredLogger.Info("successful order storing in gateway!")
 }
 func orderUnitsAccessor(order *models.Order) []*grpc_orders.SendOrderReq_PieceUnitnum {
 	units := []*grpc_orders.SendOrderReq_PieceUnitnum{}

@@ -1,6 +1,7 @@
 package restapp
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/eeQuillibrium/pizza-kitchen/internal/app/rest/server"
@@ -33,6 +34,8 @@ func (a *RESTApp) Run() {
 	}
 }
 
-func (a *RESTApp) Stop() {
-	a.Server.Stop()
+func (a *RESTApp) Stop(ctx context.Context) {
+	if err := a.Server.Stop(ctx); err != nil {
+		a.log.SugaredLogger.Infof("restserver stopping problem: %w", err)
+	}
 }

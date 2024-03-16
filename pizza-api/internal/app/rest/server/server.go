@@ -9,15 +9,15 @@ import (
 	"github.com/eeQuillibrium/pizza-api/internal/logger"
 )
 
-type Server struct {
-	server *http.Server
+type GatewayServer struct {
+	*http.Server
 }
 
 func New(
 	log *logger.Logger,
 	restport int,
 	router http.Handler,
-) *Server {
+) *GatewayServer {
 	server := &http.Server{
 		Addr:           fmt.Sprintf(":%d", restport),
 		Handler:        router,
@@ -26,13 +26,13 @@ func New(
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	return &Server{
-		server: server,
+	return &GatewayServer{
+		server,
 	}
 }
-func (s *Server) Run() error {
-	return s.server.ListenAndServe()
+func (s *GatewayServer) Run() error {
+	return s.Server.ListenAndServe()
 }
-func (s *Server) Stop(ctx context.Context) error {
-	return s.server.Shutdown(ctx)
+func (s *GatewayServer) Stop(ctx context.Context) error {
+	return s.Server.Shutdown(ctx)
 }

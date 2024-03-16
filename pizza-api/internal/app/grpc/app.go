@@ -88,7 +88,7 @@ func setConn(
 func (a *GRPCApp) Run(
 	orderPort int,
 ) {
-	a.log.SugaredLogger.Infof("try to run grpc kitchenapi serv on %s", fmt.Sprintf(":%d", orderPort))
+	a.log.SugaredLogger.Infof("run grpc server on %d", orderPort)
 
 	lst, err := net.Listen("tcp", fmt.Sprintf(":%d", orderPort))
 
@@ -102,5 +102,6 @@ func (a *GRPCApp) Run(
 }
 
 func (a *GRPCApp) Stop() {
+	a.log.SugaredLogger.Infof("stopping grpc server")
 	a.OrderServer.GracefulStop()
 }

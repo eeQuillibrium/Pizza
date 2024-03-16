@@ -10,19 +10,20 @@ import (
 
 // grpc, rest, storage
 type Config struct {
-	Server Server `yaml:"server"`
-	GRPC   GRPC   `yaml:"grpc"`
-	Repo   Repo   `yaml:"repo"`
+	Rest Rest `yaml:"rest"`
+	GRPC GRPC `yaml:"grpc"`
+	Repo Repo `yaml:"repo"`
 }
 
-type Server struct {
+type Rest struct {
 	Port int `yaml:"port"`
 }
+
 type GRPC struct {
-	Auth         Auth         `yaml:"auth"`
-	Kitchen      Kitchen      `yaml:"kitchen"`
-	KitchenOrder KitchenOrder `yaml:"kitchenorder"`
-	Appnum       int          `yaml:"appnum"`
+	Auth          Auth          `yaml:"auth"`
+	Kitchen       Kitchen       `yaml:"kitchen"`
+	KitchenServer KitchenServer `yaml:"kitchenserver"`
+	Appnum        int           `yaml:"appnum"`
 }
 type Auth struct {
 	Port int `yaml:"port"`
@@ -30,7 +31,7 @@ type Auth struct {
 type Kitchen struct {
 	Port int `yaml:"port"`
 }
-type KitchenOrder struct {
+type KitchenServer struct {
 	Port int `yaml:"port"`
 }
 

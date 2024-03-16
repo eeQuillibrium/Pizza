@@ -8,7 +8,7 @@ import (
 	"syscall"
 
 	"github.com/eeQuillibrium/pizza-api/internal/app"
-	"github.com/eeQuillibrium/pizza-api/internal/app/server"
+	restapp "github.com/eeQuillibrium/pizza-api/internal/app/rest"
 	"github.com/eeQuillibrium/pizza-api/internal/config"
 	"github.com/eeQuillibrium/pizza-api/internal/handler"
 	"github.com/eeQuillibrium/pizza-api/internal/logger"
@@ -38,21 +38,21 @@ func main() {
 	services := service.New(log, repo)
 	handl := handler.New(log, services, cfg.GRPC.Auth.Port, cfg.GRPC.Kitchen.Port, services)
 
-	RESTServ := server.New(log, cfg.Server.Port, handl.InitRoutes())
+	restapp := restapp.New(log, cfg.Rest.Port, handl.InitRoutes())
+	app := app.New(log, restapp, handl.GRPCApp)
 
-	app := app.New(log, RESTServ, handl.GRPCApp)
-
-	app.Run(cfg.GRPC.KitchenOrder.Port)
+	app.Run(cfg.GRPC.KitchenServer.Port)
 
 	stopChan := make(chan os.Signal, 1)
-	signal.Notify(stopChan, syscall.SIGTERM, syscall.SIGTERM)
+	signal.Notify(stopChan, syscall.SIGTERM, syscall.SIGINT)
 
 	sign := <-stopChan
 
+	ctx := context.Background()
 	log.SugaredLogger.Infof("try to shutdown with %v", sign)
-	app.GracefulStop(context.Background())
+	app.GracefulStop(ctx)
 
-	if err := rdb.ShutdownSave(context.Background()).Err(); err != nil {
+	if err := rdb.ShutdownSave(ctx).Err(); err != nil {
 		log.SugaredLogger.Infof("error with rdb shutdown : %w", err)
 	}
 }

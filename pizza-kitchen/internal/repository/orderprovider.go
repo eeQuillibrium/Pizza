@@ -25,7 +25,7 @@ func (r *OPRepo) StoreOrder(
 	order *models.Order,
 ) error {
 
-	orderkey := fmt.Sprintf("order:%d", 10e8+rand.Intn(9*10e8-1))
+	orderkey := generateOrderKey()
 
 	err := r.rClient.HSet(
 		ctx,
@@ -48,4 +48,8 @@ func (r *OPRepo) StoreOrder(
 	}
 
 	return nil
+}
+
+func generateOrderKey() string {
+	return fmt.Sprintf("order:%d", 10e8+rand.Intn(9*10e8-1))
 }

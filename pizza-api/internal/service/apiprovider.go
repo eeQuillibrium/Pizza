@@ -68,8 +68,8 @@ func getOrder(ordermap map[string]string) (*models.Order, error) {
 		})
 	}
 	return &models.Order{
-		Price: price,
+		Price:  price,
 		UserId: userId,
-		Units: units,
+		Units:  units,
 	}, nil
 }

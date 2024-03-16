@@ -13,7 +13,7 @@ import (
 
 func (h *Handler) ordersGetHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	
+
 	orders, err := h.service.APIProvider.GetOrders(ctx)
 	if err != nil {
 		h.log.SugaredLogger.Fatalf("getting order problem %w", err)
@@ -26,7 +26,7 @@ func (h *Handler) ordersGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(json)
 
-	h.log.SugaredLogger.Info("successful getOrders execution")
+	h.log.SugaredLogger.Info("successful getorders execution")
 }
 
 func (h *Handler) ordersExecHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +56,7 @@ func (h *Handler) ordersExecHandler(w http.ResponseWriter, r *http.Request) {
 		h.log.SugaredLogger.Fatalf("error with sendorder: %w", err)
 	}
 
-	h.log.SugaredLogger.Info("successful sendorder execution")
+	h.log.SugaredLogger.Info("successful order storing in kitchen")
 }
 
 func orderUnitsAccessor(order *models.Order) []*grpc_orders.SendOrderReq_PieceUnitnum {

@@ -50,15 +50,16 @@ func main() {
 
 	go app.Run()
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+	stopChan := make(chan os.Signal, 1)
+	signal.Notify(stopChan, syscall.SIGTERM, syscall.SIGINT)
 
-	sign := <-stop
+	sign := <-stopChan
 
+	ctx := context.Background()
 	log.SugaredLogger.Infof("try to stop program with %v", sign)
+	app.GracefulStop(ctx)
 
-	app.GracefulStop()
-	if err := rdb.ShutdownSave(context.Background()).Err(); err != nil {
+	if err := rdb.ShutdownSave(ctx).Err(); err != nil {
 		log.SugaredLogger.Infof("error with rdb shutdown : %w", err)
 	}
 }

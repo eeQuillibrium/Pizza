@@ -29,22 +29,16 @@ func (r *OPRepo) StoreOrder(
 	ctx context.Context,
 	order *models.Order,
 ) error {
-	r.log.SugaredLogger.Info("try to store order in redis", order.UserId, order.Price, order.Units)
+	orderkey := generateOrderKey()
 
-	orderkey := fmt.Sprintf("order:%d", 10e8+rand.Intn(9*10e8-1))
-	err := r.rClient.Set(ctx, "foo", "bar", 0).Err()
-	if err != nil {
-		r.log.SugaredLogger.Fatal(err)
-	}
-
-	err = r.rClient.HSet(
+	err := r.rClient.HSet(
 		ctx,
 		orderkey,
 		"userid", order.UserId,
 		"price", order.Price,
+		"len", len(order.Units),
 	).Err()
 	if err != nil {
-		r.log.SugaredLogger.Info("unsuccessful order storing")
 		return err
 	}
 
@@ -53,12 +47,13 @@ func (r *OPRepo) StoreOrder(
 			fmt.Sprintf("unitnum%d", i), order.Units[i].Unitnum,
 			fmt.Sprintf("piece%d", i), order.Units[i].Piece).Err()
 		if err != nil {
-			r.log.SugaredLogger.Info("unsuccessful order storing")
 			return err
 		}
 	}
 
-	r.log.SugaredLogger.Info("successful order storing!")
-
 	return nil
+}
+
+func generateOrderKey() string {
+	return fmt.Sprintf("order:%d", 10e8+rand.Intn(9*10e8-1))
 }

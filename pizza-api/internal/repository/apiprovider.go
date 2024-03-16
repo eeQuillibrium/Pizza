@@ -29,13 +29,11 @@ func (r *APIPRepo) GetOrders(
 		cursor uint64
 		match  string
 		count  int64
-
-	)	
+	)
 	res := []map[string]string{}
 
 	scanRes := r.rClient.Scan(ctx, cursor, match, count)
 	keys, _ := scanRes.Val()
-
 
 	for _, key := range keys {
 		val := r.rClient.HGetAll(ctx, key).Val()

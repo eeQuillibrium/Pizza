@@ -23,6 +23,7 @@ func New(
 	grpcapp := grpcapp.New(log, authport, kitchenport, kService)
 	return &Handler{
 		log:     log,
+		service: service,
 		GRPCApp: grpcapp,
 	}
 }

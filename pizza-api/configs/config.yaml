@@ -1,16 +1,20 @@
-server:
+rest:
   port: 8082
+
 grpc:
   auth:
     port: 44044
   kitchen:
     port: 44045
-  kitchenorder:
+  
+  kitchenserver:
     port: 44046
+
   appnum: 1
+
 repo:
   redis:
-    port: 6379
+    port: 6378
     password: ""
     db: 0
   

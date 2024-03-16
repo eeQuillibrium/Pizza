@@ -1,6 +1,8 @@
 package app
 
 import (
+	"context"
+
 	grpcapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/grpc"
 	restapp "github.com/eeQuillibrium/pizza-kitchen/internal/app/rest"
 )
@@ -22,11 +24,11 @@ func New(
 }
 
 func (a *App) Run() {
-	go a.GRPCApp.Run()
 	go a.RESTServ.Run()
+	a.GRPCApp.Run()
 }
 
-func (a *App) GracefulStop() {
+func (a *App) GracefulStop(ctx context.Context) {
 	a.GRPCApp.Stop()
-	a.RESTServ.Stop()
+	a.RESTServ.Stop(ctx)
 }
