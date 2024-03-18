@@ -30,8 +30,10 @@ func (s *OPService) ProvideOrder(
 ) error {
 
 	order := &models.Order{
-		UserId: int(in.Userid),
-		Price:  int(in.Price),
+		UserId:  int(in.Userid),
+		Price:   int(in.Price),
+		OrderId: int(in.Orderid),
+		State:   in.GetState().String(),
 	}
 
 	for i := 0; i < len(in.Units); i++ {

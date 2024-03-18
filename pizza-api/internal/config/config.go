@@ -20,10 +20,10 @@ type Rest struct {
 }
 
 type GRPC struct {
-	Auth          Auth          `yaml:"auth"`
-	Kitchen       Kitchen       `yaml:"kitchen"`
-	KitchenServer KitchenServer `yaml:"kitchenserver"`
-	Appnum        int           `yaml:"appnum"`
+	Auth    Auth    `yaml:"auth"`
+	Kitchen Kitchen `yaml:"kitchen"`
+	Server  Server  `yaml:"server"`
+	Appnum  int     `yaml:"appnum"`
 }
 type Auth struct {
 	Port int `yaml:"port"`
@@ -31,7 +31,7 @@ type Auth struct {
 type Kitchen struct {
 	Port int `yaml:"port"`
 }
-type KitchenServer struct {
+type Server struct {
 	Port int `yaml:"port"`
 }
 

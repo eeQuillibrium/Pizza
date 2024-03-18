@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -33,8 +32,7 @@ func (h *Handler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.log.SugaredLogger.Info("user with id=%d was registered completely!", userId)
-
-	w.Write([]byte(fmt.Sprintf("user with id=%d was registered completely!", userId)))
+	http.Redirect(w, r, "http://localhost:82/home", http.StatusPermanentRedirect)
 }
 
 func (h *Handler) signInHandler(w http.ResponseWriter, r *http.Request) {

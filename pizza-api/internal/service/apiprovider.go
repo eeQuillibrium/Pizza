@@ -24,6 +24,12 @@ func NewAPIPService(
 		repo: repo,
 	}
 }
+func (s *APIPService) CreateOrder(
+	ctx context.Context,
+	order *models.Order,
+) error {
+	return s.repo.StoreOrder(ctx, order)
+}
 func (s *APIPService) GetOrders(
 	ctx context.Context,
 ) ([]*models.Order, error) {
@@ -52,6 +58,10 @@ func getOrder(ordermap map[string]string) (*models.Order, error) {
 	if err != nil {
 		return nil, err
 	}
+	orderid, err := strconv.Atoi(ordermap["orderid"])
+	if err != nil {
+		return nil, err
+	}
 	units := []models.PieceUnitnum{}
 	for i := 0; i < len; i++ {
 		unitnum, err := strconv.Atoi(ordermap[fmt.Sprintf("unitnum%d", i)])
@@ -68,8 +78,10 @@ func getOrder(ordermap map[string]string) (*models.Order, error) {
 		})
 	}
 	return &models.Order{
-		Price:  price,
-		UserId: userId,
-		Units:  units,
+		OrderId: orderid,
+		Price:   price,
+		UserId:  userId,
+		Units:   units,
+		State:   ordermap["state"],
 	}, nil
 }

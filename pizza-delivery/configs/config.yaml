@@ -1,0 +1,15 @@
+rest:
+  port: 8082
+
+grpc:
+  client:
+    port: 44046
+    
+  server:
+    port: 44047
+
+repo:
+  redis:
+    port: 6377
+    password: ""
+    db: 0

@@ -24,8 +24,10 @@ func (s *OPService) ProvideOrder(
 	in *grpc_orders.SendOrderReq,
 ) error {
 	order := &models.Order{
-		UserId: int(in.Userid),
-		Price:  int(in.Price),
+		OrderId: int(in.Orderid),
+		UserId:  int(in.Userid),
+		Price:   int(in.Price),
+		State:   in.State.String(),
 	}
 
 	for i := 0; i < len(in.Units); i++ {

@@ -14,12 +14,12 @@ type Handler struct {
 }
 
 func New(
-	log     *logger.Logger,
+	log *logger.Logger,
 	gRPCApp *grpcapp.GRPCApp,
 	service *service.Service,
 ) *Handler {
 	return &Handler{
-		log: log,
+		log:     log,
 		gRPCApp: gRPCApp,
 		service: service,
 	}
@@ -29,7 +29,9 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
 
 	router.GET("/orders/get", h.ordersGetHandler)
-	router.GET("/orders/exec", h.ordersExecHandler)
+
+	router.POST("/orders/send/gateway", h.sendGatewayHandler)
+	router.POST("/orders/send/delivery", h.sendDeliveryHandler)
 
 	return router
 }

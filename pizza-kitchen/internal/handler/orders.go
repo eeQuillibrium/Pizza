@@ -13,8 +13,7 @@ import (
 )
 
 func (h *Handler) ordersGetHandler(c *gin.Context) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
+	ctx := context.Background()
 
 	orders, err := h.service.Kitchen.GetOrders(ctx)
 	if err != nil {
@@ -27,9 +26,8 @@ func (h *Handler) ordersGetHandler(c *gin.Context) {
 	}
 
 	c.Writer.Write(json)
-	h.log.SugaredLogger.Info("successful getorders execution")
 }
-func (h *Handler) ordersExecHandler(c *gin.Context) {
+func (h *Handler) sendGatewayHandler(c *gin.Context) {
 	b, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		h.log.SugaredLogger.Fatalf("order json reading problem: %w", err)
@@ -44,21 +42,46 @@ func (h *Handler) ordersExecHandler(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err = h.gRPCApp.APIOrderSender.SendOrder(
+	_, err = h.gRPCApp.GatewayOS.SendOrder(
 		ctx,
-		&grpc_orders.SendOrderReq{
-			Units:  orderUnitsAccessor(&order),
-			Userid: int64(order.UserId),
-			Price:  int64(order.Price),
-		},
+		orderAccessor(&order),
 	)
 	if err != nil {
 		h.log.SugaredLogger.Fatalf("error with sendorder: %v", err)
 	}
-
-	h.log.SugaredLogger.Info("successful order storing in gateway!")
 }
-func orderUnitsAccessor(order *models.Order) []*grpc_orders.SendOrderReq_PieceUnitnum {
+func (h *Handler) sendDeliveryHandler(c *gin.Context) {
+	b, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		h.log.SugaredLogger.Fatalf("order json reading problem: %w", err)
+	}
+	if len(b) == 0 {
+		h.log.SugaredLogger.Fatal("empty req body")
+	}
+
+	var order models.Order
+	json.Unmarshal(b, &order)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	gReq := orderAccessor(&order)
+
+	if _, err = h.gRPCApp.GatewayOS.SendOrder(
+		ctx,
+		gReq,
+	); err != nil {
+		h.log.SugaredLogger.Fatalf("error with sendorder to gateway: %v", err)
+	}
+
+	if _, err = h.gRPCApp.DeliveryOS.SendOrder(
+		ctx,
+		gReq,
+	); err != nil {
+		h.log.SugaredLogger.Fatalf("error with sendorder to delivery: %v", err)
+	}
+}
+func orderAccessor(order *models.Order) *grpc_orders.SendOrderReq {
 	units := []*grpc_orders.SendOrderReq_PieceUnitnum{}
 	for i := 0; i < len(order.Units); i++ {
 		units = append(units, &grpc_orders.SendOrderReq_PieceUnitnum{
@@ -66,5 +89,12 @@ func orderUnitsAccessor(order *models.Order) []*grpc_orders.SendOrderReq_PieceUn
 			Unitnum: int64(order.Units[i].Unitnum),
 		})
 	}
-	return units
+
+	return &grpc_orders.SendOrderReq{
+		Orderid: int64(order.OrderId),
+		Userid: int64(order.UserId),
+		Price:  int64(order.Price),
+		Units:  units,
+		State:  grpc_orders.SendOrderReq_DELIVER,
+	}
 }

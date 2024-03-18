@@ -41,7 +41,7 @@ func main() {
 	restapp := restapp.New(log, cfg.Rest.Port, handl.InitRoutes())
 	app := app.New(log, restapp, handl.GRPCApp)
 
-	app.Run(cfg.GRPC.KitchenServer.Port)
+	app.Run(cfg.GRPC.Server.Port)
 
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, syscall.SIGTERM, syscall.SIGINT)

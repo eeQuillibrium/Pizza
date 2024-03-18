@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-	"math/rand"
 
 	"github.com/eeQuillibrium/pizza-kitchen/internal/domain/models"
 	"github.com/redis/go-redis/v9"
@@ -20,36 +19,32 @@ func NewOPRepo(
 		rClient: rClient,
 	}
 }
+
 func (r *OPRepo) StoreOrder(
 	ctx context.Context,
 	order *models.Order,
 ) error {
-
-	orderkey := generateOrderKey()
-
-	err := r.rClient.HSet(
+	orderkey := fmt.Sprintf("order:%d", order.OrderId)
+	if err := r.rClient.HSet(
 		ctx,
 		orderkey,
+		"orderid", order.OrderId,
 		"userid", order.UserId,
 		"price", order.Price,
+		"state", order.State,
 		"len", len(order.Units),
-	).Err()
-	if err != nil {
+	).Err(); err != nil {
 		return err
 	}
 
 	for i := 0; i < len(order.Units); i++ {
-		err := r.rClient.HSet(ctx, orderkey,
+		if err := r.rClient.HSet(ctx, orderkey,
 			fmt.Sprintf("unitnum%d", i), order.Units[i].Unitnum,
-			fmt.Sprintf("piece%d", i), order.Units[i].Piece).Err()
-		if err != nil {
+			fmt.Sprintf("piece%d", i), order.Units[i].Piece).
+			Err(); err != nil {
 			return err
 		}
 	}
 
 	return nil
-}
-
-func generateOrderKey() string {
-	return fmt.Sprintf("order:%d", 10e8+rand.Intn(9*10e8-1))
 }

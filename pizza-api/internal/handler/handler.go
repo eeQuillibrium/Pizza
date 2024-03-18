@@ -30,6 +30,7 @@ func New(
 
 func (h *Handler) InitRoutes() *mux.Router {
 	r := mux.NewRouter()
+	r.HandleFunc("/home", h.homeHandler)
 
 	r.HandleFunc("/orders/get", h.ordersGetHandler)
 	r.HandleFunc("/orders/exec", h.ordersExecHandler)

@@ -28,7 +28,7 @@ func New(
 
 func (a *App) Run(orderPort int) {
 	go a.RESTApp.Run()
-	a.GRPCApp.Run(orderPort)
+	go a.GRPCApp.Run(orderPort)
 }
 func (a *App) GracefulStop(ctx context.Context) {
 	a.GRPCApp.Stop()

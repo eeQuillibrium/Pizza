@@ -39,8 +39,9 @@ func main() {
 	service := service.New(repo)
 	grpcApp := grpcapp.New(
 		log,
-		cfg.GRPC.Kitchenapi.Client.Port,
-		cfg.GRPC.Kitchenapi.Server.Port,
+		cfg.GRPC.ClientGate.Port,
+		cfg.GRPC.ClientDelivery.Port,
+		cfg.GRPC.Server.Port,
 		service,
 	)
 	handl := handler.New(log, grpcApp, service)

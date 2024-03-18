@@ -20,6 +20,10 @@ type APIProvider interface {
 	GetOrders(
 		ctx context.Context,
 	) []map[string]string
+	StoreOrder(
+		ctx context.Context,
+		order *models.Order,
+	) error
 }
 
 type Repository struct {

@@ -1,5 +1,5 @@
 rest:
-  port: 8082
+  port: 8080
 
 grpc:
   auth:
@@ -7,7 +7,7 @@ grpc:
   kitchen:
     port: 44045
   
-  kitchenserver:
+  server:
     port: 44046
 
   appnum: 1

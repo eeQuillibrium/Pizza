@@ -22,7 +22,7 @@ func (s *KitchenService) GetOrders(
 	ctx context.Context,
 ) ([]*models.Order, error) {
 	orders := s.repo.GetOrders(ctx)
-	
+
 	res := []*models.Order{}
 	for i := 0; i < len(orders); i++ {
 		order, err := getOrder(orders[i])
@@ -47,6 +47,10 @@ func getOrder(ordermap map[string]string) (*models.Order, error) {
 	if err != nil {
 		return nil, err
 	}
+	orderid, err := strconv.Atoi(ordermap["orderid"])
+	if err != nil {
+		return nil, err
+	}
 	units := []models.PieceUnitnum{}
 	for i := 0; i < len; i++ {
 		unitnum, err := strconv.Atoi(ordermap[fmt.Sprintf("unitnum%d", i)])
@@ -63,8 +67,10 @@ func getOrder(ordermap map[string]string) (*models.Order, error) {
 		})
 	}
 	return &models.Order{
-		Price: price,
-		UserId: userId,
-		Units: units,
+		OrderId: orderid,
+		Price:   price,
+		UserId:  userId,
+		Units:   units,
+		State:   ordermap["state"],
 	}, nil
 }

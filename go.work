@@ -5,5 +5,6 @@ use (
 	./pizza-api
 	./pizza-auth
 	./pizza-kitchen
+	./pizza-delivery
 	./tester
 )

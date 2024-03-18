@@ -1,12 +1,14 @@
 grpcapp:
-  kitchenapi:
-    client:
-      port: 44046
-    server:
-      port: 44045
-  appnum: 2
+  clientgate:
+    port: 44046
+  clientdelivery:
+    port: 44047
+  server:
+    port: 44045
+
 restapp:
   port: 8081
+
 repo:
   redis:
     port: 6379

@@ -15,15 +15,14 @@ type Config struct {
 }
 
 type GRPCApp struct {
-	Kitchenapi Kitcheapi  `yaml:"kitchenapi"`
-	Appnum     int        `yaml:"appnum"`
+	ClientGate    ClientGate     `yaml:"clientgate"`
+	ClientDelivery ClientDelivery `yaml:"clientdelivery"`
+	Server        Server         `yaml:"server"`
 }
-
-type Kitcheapi struct {
-	Client Client `yaml:"client"`
-	Server Server `yaml:"server"`
+type ClientGate struct {
+	Port int `yaml:"port"`
 }
-type Client struct {
+type ClientDelivery struct {
 	Port int `yaml:"port"`
 }
 type Server struct {

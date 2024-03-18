@@ -19,7 +19,7 @@ func New(
 	port int,
 	handler http.Handler,
 ) *RESTApp {
-	server := server.New(log, port, handler)
+	server := server.New(port, handler)
 	return &RESTApp{
 		log:    log,
 		port:   port,

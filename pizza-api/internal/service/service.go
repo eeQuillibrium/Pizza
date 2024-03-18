@@ -20,6 +20,10 @@ type APIProvider interface {
 	GetOrders(
 		ctx context.Context,
 	) ([]*models.Order, error)
+	CreateOrder(
+		context.Context,
+		*models.Order,
+	) error
 }
 
 type Service struct {
