@@ -11,10 +11,10 @@ func (h *Handler) InitRoutes() http.Handler {
 	r.Get("/", h.homeHandler)
 
 	r.Get("/orders/get", h.ordersGetHandler)
-	r.Post("/orders/exec", h.ordersExecHandler)
+	r.Post("/orders/send/gateway", h.sendGatewayHandler)
 	return r
 }
 
 func (h *Handler) homeHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Hello from home!"))
+	w.Write([]byte("Hello from homepage!"))
 }

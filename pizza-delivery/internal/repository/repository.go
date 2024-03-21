@@ -18,6 +18,10 @@ type APIProvider interface {
 	GetOrders(
 		ctx context.Context,
 	) []map[string]string
+	DeleteOrder(
+		ctx context.Context,
+		orderId int,
+	) error
 }
 
 type Repository struct {

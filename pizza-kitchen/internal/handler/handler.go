@@ -29,8 +29,6 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
 
 	router.GET("/orders/get", h.ordersGetHandler)
-
-	router.POST("/orders/send/gateway", h.sendGatewayHandler)
 	router.POST("/orders/send/delivery", h.sendDeliveryHandler)
 
 	return router

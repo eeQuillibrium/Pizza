@@ -18,7 +18,6 @@ func NewOPService(
 	log *logger.Logger,
 	repo repository.OrderProvider,
 ) *OPService {
-
 	return &OPService{
 		log:  log,
 		repo: repo,

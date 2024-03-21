@@ -29,7 +29,7 @@ func (h *Handler) ordersGetHandler(w http.ResponseWriter, r *http.Request) {
 	h.log.SugaredLogger.Info("successful getorders execution")
 }
 
-func (h *Handler) ordersExecHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) sendKitchenHandler(w http.ResponseWriter, r *http.Request) {
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		h.log.SugaredLogger.Fatalf("order json reading problem: %w", err)

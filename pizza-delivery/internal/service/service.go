@@ -20,6 +20,10 @@ type APIProvider interface {
 	GetOrders(
 		ctx context.Context,
 	) ([]*models.Order, error)
+	DeleteOrder(
+		ctx context.Context,
+		orderId int,
+	) error
 }
 
 type Service struct {
@@ -30,6 +34,7 @@ type Service struct {
 func New(
 	repo *repository.Repository,
 ) *Service {
+
 	return &Service{
 		OrderProvider: NewOPService(repo.OrderProvider),
 		APIProvider:   NewAPIPService(repo.APIProvider),

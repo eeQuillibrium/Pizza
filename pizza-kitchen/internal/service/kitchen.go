@@ -18,6 +18,13 @@ func NewKitchenService(
 ) *KitchenService {
 	return &KitchenService{repo: repo}
 }
+func (s *KitchenService) DeleteOrder(
+	ctx context.Context,
+	orderId int,
+) error {
+	return s.repo.DeleteOrder(ctx, orderId)
+}
+
 func (s *KitchenService) GetOrders(
 	ctx context.Context,
 ) ([]*models.Order, error) {

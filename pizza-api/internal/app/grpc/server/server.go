@@ -25,6 +25,5 @@ func (s *GRPCServer) SendOrder(
 	in *grpc_orders.SendOrderReq,
 ) (*grpc_orders.EmptyOrderResp, error) {
 	err := s.service.ProvideOrder(ctx, in)
-
 	return &grpc_orders.EmptyOrderResp{}, err
 }

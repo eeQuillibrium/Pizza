@@ -33,7 +33,7 @@ func (h *Handler) InitRoutes() *mux.Router {
 	r.HandleFunc("/home", h.homeHandler)
 
 	r.HandleFunc("/orders/get", h.ordersGetHandler)
-	r.HandleFunc("/orders/exec", h.ordersExecHandler)
+	r.HandleFunc("/orders/send/kitchen", h.sendKitchenHandler)
 
 	r.HandleFunc("/auth/signUp", h.signUpHandler)
 	r.HandleFunc("/auth/signIn", h.signInHandler)

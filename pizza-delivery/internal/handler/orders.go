@@ -16,11 +16,13 @@ func (h *Handler) ordersGetHandler(w http.ResponseWriter, r *http.Request) {
 	orders, err := h.services.GetOrders(ctx)
 	if err != nil {
 		h.log.SugaredLogger.Infof("get orders problem occured: %w", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	json, err := json.Marshal(orders)
 	if err != nil {
 		h.log.SugaredLogger.Fatalf("marshaling problem occured: %w", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	w.Write(json)
@@ -28,25 +30,30 @@ func (h *Handler) ordersGetHandler(w http.ResponseWriter, r *http.Request) {
 	h.log.SugaredLogger.Info("successful getorders execution")
 
 }
-func (h *Handler) ordersExecHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) sendGatewayHandler(w http.ResponseWriter, r *http.Request) {
 	var order models.Order
 
 	jsonBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		h.log.SugaredLogger.Infof("json reading problem: %w", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	json.Unmarshal(jsonBody, &order)
 
 	ctx := context.Background()
 
-	_, err = h.gRPCApp.GatewayClient.SendOrder(
+	if _, err = h.gRPCApp.GatewayClient.SendOrder(
 		ctx,
 		orderAccessor(&order),
-	)
-
-	if err != nil {
+	); err != nil {
 		h.log.SugaredLogger.Infof("order sending problem: %w", err)
+		w.WriteHeader(http.StatusBadGateway)
+	}
+
+	if err := h.services.APIProvider.DeleteOrder(ctx, order.OrderId); err != nil {
+		h.log.SugaredLogger.Infof("order deleting problem: %w", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 func orderAccessor(order *models.Order) *grpc_orders.SendOrderReq {

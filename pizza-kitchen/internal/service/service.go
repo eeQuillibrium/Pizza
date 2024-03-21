@@ -16,6 +16,7 @@ type OrderProvider interface {
 }
 type Kitchen interface {
 	GetOrders(ctx context.Context) ([]*models.Order, error)
+	DeleteOrder(ctx context.Context, orderId int) error
 }
 
 type KitchenRedisService interface {

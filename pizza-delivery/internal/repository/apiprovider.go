@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -17,7 +18,12 @@ func NewAPIPRepo(
 		rClient: rClient,
 	}
 }
-
+func (r *APIPRepo) DeleteOrder(
+	ctx context.Context,
+	orderId int,
+) error {
+	return r.rClient.Del(ctx, fmt.Sprintf("order:%d", orderId)).Err()
+}
 func (r *APIPRepo) GetOrders(
 	ctx context.Context,
 ) []map[string]string {

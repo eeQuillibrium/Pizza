@@ -20,7 +20,12 @@ func NewAPIPService(
 		repo: repo,
 	}
 }
-
+func (s *APIPService) DeleteOrder(
+	ctx context.Context,
+	orderId int,
+) error {
+	return s.repo.DeleteOrder(ctx, orderId)
+}
 func (s *APIPService) GetOrders(
 	ctx context.Context,
 ) ([]*models.Order, error) {
@@ -45,7 +50,7 @@ func getOrder(ordermap map[string]string) (*models.Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	len, err := strconv.Atoi(ordermap["len"])
+	len, err := strconv.Atoi(ordermap["len"]) // *
 	if err != nil {
 		return nil, err
 	}
