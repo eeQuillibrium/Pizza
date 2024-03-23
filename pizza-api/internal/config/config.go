@@ -36,12 +36,20 @@ type Server struct {
 }
 
 type Repo struct {
-	Redis Redis `yaml:"redis"`
+	Redis    Redis    `yaml:"redis"`
+	Postgres Postgres `yaml:"postgres"`
 }
 type Redis struct {
 	Port     int    `yaml:"port"`
 	Password string `yaml:"password"`
 	DB       int    `yaml:"db"`
+}
+type Postgres struct {
+	Username string `yaml:"username"`
+	Host     string `yaml:"host"`
+	DBName   string `yaml:"dbname"`
+	Port     int    `yaml:"port"`
+	SSLMode  string `yaml:"sslmode"`
 }
 
 func New() *Config {

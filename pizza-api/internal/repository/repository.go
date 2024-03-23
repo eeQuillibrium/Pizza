@@ -5,6 +5,7 @@ import (
 
 	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
 	"github.com/eeQuillibrium/pizza-api/internal/logger"
+	"github.com/jmoiron/sqlx"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -13,21 +14,30 @@ type OrderProvider interface {
 	StoreOrder(
 		ctx context.Context,
 		order *models.Order,
-	) error
+	) error //from grpc
 }
 
 type APIProvider interface {
 	GetCurrentOrders(
 		ctx context.Context,
 		userId int,
-	) []map[string]string
-	StoreOrder(
+	) ([]*models.Order, error)
+	GetOrdersHistory(
 		ctx context.Context,
-		order *models.Order,
-	) error
+		userId int,
+	) ([]*models.Order, error)
 	DeleteOrder(
 		ctx context.Context,
 		order *models.Order,
+	) error
+	StoreOrder(
+		ctx context.Context,
+		order *models.Order,
+	) error //order from client
+	StoreReview(
+		ctx context.Context,
+		userId int,
+		reviewText string,
 	) error
 }
 
@@ -38,10 +48,11 @@ type Repository struct {
 
 func New(
 	log *logger.Logger,
+	db *sqlx.DB,
 	rClient *redis.Client,
 ) *Repository {
 	return &Repository{
-		OrderProvider: NewOPRepo(log, rClient),
-		APIProvider:   NewAPIPRepo(log, rClient),
+		OrderProvider: NewOPRepo(log, db, rClient),
+		APIProvider:   NewAPIPRepo(log, db, rClient),
 	}
 }

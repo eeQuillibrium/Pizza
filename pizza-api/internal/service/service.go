@@ -21,6 +21,10 @@ type APIProvider interface {
 		ctx context.Context,
 		userId int,
 	) ([]*models.Order, error)
+	GetOrdersHistory(
+		ctx context.Context,
+		userId int,
+	) ([]*models.Order, error)
 	CreateOrder(
 		ctx context.Context,
 		order *models.Order,
@@ -29,8 +33,12 @@ type APIProvider interface {
 		ctx context.Context,
 		order *models.Order,
 	) error
+	CreateReview(
+		ctx context.Context,
+		userId int,
+		reviewText string,
+	) error
 }
-
 
 type Service struct {
 	OrderProvider

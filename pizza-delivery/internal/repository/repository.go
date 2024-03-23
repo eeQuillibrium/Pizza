@@ -12,7 +12,6 @@ type OrderProvider interface {
 		ctx context.Context,
 		order *models.Order,
 	) error
-
 }
 type APIProvider interface {
 	GetOrders(

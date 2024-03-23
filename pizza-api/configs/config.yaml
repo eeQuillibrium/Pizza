@@ -17,4 +17,10 @@ repo:
     port: 6378
     password: ""
     db: 0
+  postgres:
+    sslmode: "disable"
+    host: "localhost"
+    port: 5433
+    dbname: "orders"
+    username: "postgres"
   

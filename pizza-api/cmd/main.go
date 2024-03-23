@@ -14,6 +14,7 @@ import (
 	"github.com/eeQuillibrium/pizza-api/internal/logger"
 	"github.com/eeQuillibrium/pizza-api/internal/repository"
 	"github.com/eeQuillibrium/pizza-api/internal/service"
+	"github.com/jmoiron/sqlx"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/joho/godotenv"
@@ -34,7 +35,23 @@ func main() {
 		DB:       cfg.Repo.Redis.DB,
 	})
 
-	repo := repository.New(log, rdb)
+	db, err := sqlx.Open("postgres", fmt.Sprintf(
+		"user=%s password=%s host=%s dbname=%s port=%d sslmode=%s",
+		cfg.Repo.Postgres.Username,
+		os.Getenv("DB_PASSWORD"),
+		cfg.Repo.Postgres.Host,
+		cfg.Repo.Postgres.DBName,
+		cfg.Repo.Postgres.Port,
+		cfg.Repo.Postgres.SSLMode,
+	))
+	if err != nil {
+		log.SugaredLogger.Fatalf("problem with postgres db.Open() occured: %w", err)
+	}
+	if err := db.Ping(); err != nil {
+		log.SugaredLogger.Fatalf("postgres db ping problem occured: %w", err)
+	}
+
+	repo := repository.New(log, db, rdb)
 	services := service.New(log, repo)
 	handl := handler.New(log, services, cfg.GRPC.Auth.Port, cfg.GRPC.Kitchen.Port, services)
 
