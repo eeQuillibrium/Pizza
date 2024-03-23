@@ -45,6 +45,10 @@ func (r *OPRepo) StoreOrder(
 			return err
 		}
 	}
+	if err := r.rClient.HMSet(ctx, fmt.Sprintf("user:%d", order.UserId), orderkey).
+		Err(); err != nil {
+		return err
+	}
 
 	return nil
 }

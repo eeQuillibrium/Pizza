@@ -40,9 +40,13 @@ func (r *OPRepo) StoreOrder(
 		if err := r.rClient.HSet(ctx, orderkey,
 			fmt.Sprintf("unitnum%d", i), order.Units[i].Unitnum,
 			fmt.Sprintf("piece%d", i), order.Units[i].Piece).
-		Err(); err != nil {
+			Err(); err != nil {
 			return err
 		}
+	}
+	if err := r.rClient.HMSet(ctx, fmt.Sprintf("user:%d", order.UserId), orderkey).
+		Err(); err != nil {
+		return err
 	}
 
 	return nil

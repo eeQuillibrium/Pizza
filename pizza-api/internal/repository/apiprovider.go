@@ -24,14 +24,16 @@ func NewAPIPRepo(
 	}
 }
 
-func (r *APIPRepo) GetOrders(
+func (r *APIPRepo) GetCurrentOrders(
 	ctx context.Context,
+	userId int,
 ) []map[string]string {
 	var (
 		cursor uint64
 		match  string
 		count  int64
 	)
+
 	res := []map[string]string{}
 
 	keys, _ := r.rClient.Scan(ctx, cursor, match, count).Val()
@@ -48,7 +50,9 @@ func (r *APIPRepo) StoreOrder(
 	ctx context.Context,
 	order *models.Order,
 ) error {
+
 	orderkey := fmt.Sprintf("order:%d", order.OrderId)
+
 	if err := r.rClient.HMSet(
 		ctx,
 		orderkey,
@@ -69,6 +73,19 @@ func (r *APIPRepo) StoreOrder(
 			return err
 		}
 	}
+
+	if err := r.rClient.HMSet(ctx, fmt.Sprintf("user:%d", order.UserId), orderkey).
+		Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *APIPRepo) DeleteOrder(
+	ctx context.Context,
+	order *models.Order,
+) error {
 
 	return nil
 }

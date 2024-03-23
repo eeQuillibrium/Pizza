@@ -30,10 +30,14 @@ func (s *APIPService) CreateOrder(
 ) error {
 	return s.repo.StoreOrder(ctx, order)
 }
-func (s *APIPService) GetOrders(
+
+func (s *APIPService) GetCurrentOrders(
 	ctx context.Context,
+	userId int,
 ) ([]*models.Order, error) {
-	orders := s.repo.GetOrders(ctx)
+
+	orders := s.repo.GetCurrentOrders(ctx, userId)
+	
 	res := []*models.Order{}
 	for i := 0; i < len(orders); i++ {
 		order, err := getOrder(orders[i])
@@ -85,3 +89,10 @@ func getOrder(ordermap map[string]string) (*models.Order, error) {
 		State:   ordermap["state"],
 	}, nil
 }
+
+func (s *APIPService) DeleteOrder(
+	ctx context.Context,
+	order *models.Order,
+) error {
+	return s.repo.DeleteOrder(ctx, order)
+}	

@@ -5,23 +5,38 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
 	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 )
 
-
+func (h *Handler) ordersHandler(w http.ResponseWriter, r *http.Request) {
+	
+}
 func (h *Handler) ordersGetHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
 
-	orders, err := h.service.GetOrders(ctx)
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	userId := struct{UserId int`json:"userid"`}{}
+	json.Unmarshal(data, &userId)
+
+	orders, err := h.service.GetCurrentOrders(ctx, userId.UserId)
 	if err != nil {
 		h.log.SugaredLogger.Fatalf("getting order problem %w", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	json, err := json.Marshal(orders)
 	if err != nil {
 		h.log.SugaredLogger.Fatalf("marshaling problem %w", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	w.Write(json)
@@ -51,7 +66,6 @@ func (h *Handler) sendKitchenHandler(w http.ResponseWriter, r *http.Request) {
 	); err != nil {
 		h.log.SugaredLogger.Fatalf("error with sendorder: %w", err)
 	}
-
 
 	h.log.SugaredLogger.Info("successful order storing in kitchen")
 }

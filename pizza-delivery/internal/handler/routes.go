@@ -10,6 +10,7 @@ func (h *Handler) InitRoutes() http.Handler {
 	r := chi.NewRouter()
 	r.Get("/", h.homeHandler)
 
+	r.Get("/orders", h.ordersHandler)
 	r.Get("/orders/get", h.ordersGetHandler)
 	r.Post("/orders/send/gateway", h.sendGatewayHandler)
 	return r

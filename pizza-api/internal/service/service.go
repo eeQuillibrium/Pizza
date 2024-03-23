@@ -17,14 +17,20 @@ type OrderProvider interface {
 	) error
 }
 type APIProvider interface {
-	GetOrders(
+	GetCurrentOrders(
 		ctx context.Context,
+		userId int,
 	) ([]*models.Order, error)
 	CreateOrder(
-		context.Context,
-		*models.Order,
+		ctx context.Context,
+		order *models.Order,
+	) error
+	DeleteOrder(
+		ctx context.Context,
+		order *models.Order,
 	) error
 }
+
 
 type Service struct {
 	OrderProvider

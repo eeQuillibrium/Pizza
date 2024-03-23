@@ -10,6 +10,8 @@ import (
 	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 )
 
+func (h *Handler) ordersHandler(w http.ResponseWriter, r *http.Request) {
+}
 func (h *Handler) ordersGetHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 

@@ -10,7 +10,8 @@ import (
 
 	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
 )
-
+func (h *Handler) authHandler(w http.ResponseWriter, r *http.Request) {
+}
 func (h *Handler) signUpHandler(w http.ResponseWriter, r *http.Request) {
 	h.log.SugaredLogger.Info("request for signUp...")
 

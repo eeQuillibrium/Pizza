@@ -17,10 +17,15 @@ type OrderProvider interface {
 }
 
 type APIProvider interface {
-	GetOrders(
+	GetCurrentOrders(
 		ctx context.Context,
+		userId int,
 	) []map[string]string
 	StoreOrder(
+		ctx context.Context,
+		order *models.Order,
+	) error
+	DeleteOrder(
 		ctx context.Context,
 		order *models.Order,
 	) error
@@ -37,6 +42,6 @@ func New(
 ) *Repository {
 	return &Repository{
 		OrderProvider: NewOPRepo(log, rClient),
-		APIProvider: NewAPIPRepo(log, rClient),
+		APIProvider:   NewAPIPRepo(log, rClient),
 	}
 }
