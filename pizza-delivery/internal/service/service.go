@@ -8,7 +8,7 @@ import (
 	"github.com/eeQuillibrium/pizza-delivery/internal/domain/models"
 	"github.com/eeQuillibrium/pizza-delivery/internal/repository"
 )
-
+const unitSep = ","
 type OrderProvider interface {
 	StoreOrder(
 		ctx context.Context,
@@ -16,12 +16,12 @@ type OrderProvider interface {
 	) error
 	CancelOrder(
 		ctx context.Context,
-		in *grpc_orders.SendOrderReq,
+		orderId int,
 	) error
 }
 
 type APIProvider interface {
-	GetOrders(
+	GetCurrentOrders(
 		ctx context.Context,
 	) ([]*models.Order, error)
 	DeleteOrder(

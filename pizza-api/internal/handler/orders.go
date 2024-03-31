@@ -35,9 +35,10 @@ func (h *Handler) createOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
-
+	
 	order.State = grpc_orders.SendOrderReq_ORDERED.String()
-	if err := h.service.APIProvider.CreateOrder(ctx, &order); err != nil {
+	order.OrderId, err = h.service.APIProvider.CreateOrder(ctx, &order); 
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		h.log.SugaredLogger.Fatalf("error with sendorder: %w", err)
 	}
@@ -126,7 +127,7 @@ func (h *Handler) ordersHistoryHandler(w http.ResponseWriter, r *http.Request) {
 		UserId int `json:"userid"`
 	}{}
 	json.Unmarshal(data, &userId)
-	h.log.SugaredLogger.Infof("userid: %d", userId.UserId)
+
 	orders, err := h.service.APIProvider.GetOrdersHistory(ctx, userId.UserId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -17,7 +17,7 @@ func (h *Handler) ordersGetHandler(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 
-	orders, err := h.service.Kitchen.GetOrders(ctx)
+	orders, err := h.service.Kitchen.GetCurrentOrders(ctx)
 	if err != nil {
 		c.Status(http.StatusInternalServerError)
 		h.log.SugaredLogger.Infof("getorders problem: %w", err)
@@ -49,7 +49,7 @@ func (h *Handler) sendDeliveryHandler(c *gin.Context) {
 
 	ctx := context.Background()
 
-	if err := h.service.DeleteOrder(ctx, order.OrderId); err != nil {
+	if err := h.service.Kitchen.CancelOrder(ctx, order.OrderId); err != nil {
 		c.Status(http.StatusInternalServerError)
 		h.log.SugaredLogger.Infof("deleting problem occured: %w", err)
 	}
@@ -95,7 +95,7 @@ func (h *Handler) ordersCancel(c *gin.Context) {
 		h.log.SugaredLogger.Fatalf("error with sendorder to delivery: %v", err)
 	}
 
-	if err := h.service.Kitchen.CancelOrder(ctx, &order); err != nil {
+	if err := h.service.Kitchen.CancelOrder(ctx, order.OrderId); err != nil {
 		c.Status(http.StatusInternalServerError)
 		h.log.SugaredLogger.Fatalf("error with cancel order: %v", err)
 	}

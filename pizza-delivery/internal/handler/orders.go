@@ -38,7 +38,7 @@ func (h *Handler) ordersCancelHandler(w http.ResponseWriter, r *http.Request) {
 		h.log.SugaredLogger.Fatalf("kitchen sending problem: %w", err)
 	}
 
-	if err := h.services.CancelOrder(ctx, in); err != nil {
+	if err := h.services.APIProvider.DeleteOrder(ctx, order.OrderId); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		h.log.SugaredLogger.Fatalf("cancel order problem: %w", err)
 	}
@@ -48,7 +48,7 @@ func (h *Handler) ordersCancelHandler(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) ordersGetHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
-	orders, err := h.services.GetOrders(ctx)
+	orders, err := h.services.GetCurrentOrders(ctx)
 	if err != nil {
 		h.log.SugaredLogger.Infof("get orders problem occured: %w", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -61,9 +61,6 @@ func (h *Handler) ordersGetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(json)
-
-	h.log.SugaredLogger.Info("successful getorders execution")
-
 }
 func (h *Handler) sendGatewayHandler(w http.ResponseWriter, r *http.Request) {
 	var order models.Order

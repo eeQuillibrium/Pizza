@@ -24,7 +24,7 @@ func (r *APIPRepo) DeleteOrder(
 ) error {
 	return r.rClient.Del(ctx, fmt.Sprintf("order:%d", orderId)).Err()
 }
-func (r *APIPRepo) GetOrders(
+func (r *APIPRepo) GetCurrentOrders(
 	ctx context.Context,
 ) []map[string]string {
 	var (

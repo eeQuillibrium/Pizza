@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/eeQuillibrium/pizza-delivery/internal/domain/models"
 	"github.com/eeQuillibrium/pizza-delivery/internal/repository"
 	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 )
@@ -24,27 +24,37 @@ func (s *OPService) StoreOrder(
 	ctx context.Context,
 	in *grpc_orders.SendOrderReq,
 ) error {
-	order := &models.Order{
-		OrderId: int(in.Orderid),
-		UserId:  int(in.Userid),
-		Price:   int(in.Price),
-		State:   in.GetState().String(),
-	}
+	unitNums, amount := s.createUnitRecords(ctx, in.GetUnits())
 
-	for i := 0; i < len(in.Units); i++ {
-		order.Units = append(order.Units,
-			models.PieceUnitnum{
-				Unitnum: int(in.Units[i].Unitnum),
-				Piece:   int(in.Units[i].Piece),
-			})
+	return s.repo.StoreOrder(
+		ctx,
+		int(in.GetOrderid()),
+		int(in.GetUserid()),
+		int(in.GetPrice()),
+		in.GetState().String(),
+		unitNums,
+		amount,
+	)
+}
+func (s *OPService) createUnitRecords(
+	ctx context.Context,
+	units []*grpc_orders.SendOrderReq_PieceUnitnum,
+) (string, string) {
+	unitNums := fmt.Sprintf("%d", units[0].Unitnum)
+	for i := 1; i < len(units); i++ {
+		unitNums += fmt.Sprintf("%s%d", unitSep, units[i].Unitnum)
 	}
-
-	return s.repo.StoreOrder(ctx, order)
+	pieceNums := fmt.Sprintf("%d", units[0].Piece)
+	for i := 1; i < len(units); i++ {
+		pieceNums += fmt.Sprintf("%s%d", unitSep, units[i].Piece)
+	}
+	return unitNums, pieceNums
 }
 
 func (s *OPService) CancelOrder(
 	ctx context.Context,
-	in *grpc_orders.SendOrderReq,
+	orderId int,
 ) error {
-	return s.repo.DeleteOrder(ctx, int(in.Orderid))
+	return s.repo.DeleteOrder(ctx, orderId)
 }
+

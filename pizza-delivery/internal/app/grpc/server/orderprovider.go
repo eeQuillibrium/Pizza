@@ -12,7 +12,7 @@ func (s *serverAPI) SendOrder(
 ) (*grpc_orders.EmptyOrderResp, error) {
 	resp := &grpc_orders.EmptyOrderResp{}
 	if in.GetState().String() == "CANCELLED" {
-		return resp, s.orderProvider.CancelOrder(ctx, in)
+		return resp, s.orderProvider.CancelOrder(ctx, int(in.GetOrderid()))
 	}
 	return resp, s.orderProvider.StoreOrder(ctx, in)
 }

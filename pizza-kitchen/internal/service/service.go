@@ -8,6 +8,8 @@ import (
 	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 )
 
+const unitSep = ","
+
 type OrderProvider interface {
 	ProvideOrder(
 		ctx context.Context,
@@ -15,22 +17,17 @@ type OrderProvider interface {
 	) error
 	CancelOrder(
 		ctx context.Context,
-		in *grpc_orders.SendOrderReq,
+		orderId int,
 	) error
 }
 type Kitchen interface {
-	GetOrders(
+	GetCurrentOrders(
 		ctx context.Context,
 	) ([]*models.Order, error)
 	CancelOrder(
 		ctx context.Context,
-		order *models.Order,
-	) error
-	DeleteOrder(
-		ctx context.Context,
 		orderId int,
 	) error
-	
 }
 
 type Service struct {

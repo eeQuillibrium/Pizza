@@ -3,14 +3,18 @@ package repository
 import (
 	"context"
 
-	"github.com/eeQuillibrium/pizza-delivery/internal/domain/models"
 	"github.com/redis/go-redis/v9"
 )
 
 type OrderProvider interface {
 	StoreOrder(
 		ctx context.Context,
-		order *models.Order,
+		orderId int,
+		userId int,
+		price int,
+		state string,
+		unitNums string,
+		amount string,
 	) error
 	DeleteOrder(
 		ctx context.Context,
@@ -18,7 +22,7 @@ type OrderProvider interface {
 	) error
 }
 type APIProvider interface {
-	GetOrders(
+	GetCurrentOrders(
 		ctx context.Context,
 	) []map[string]string
 	DeleteOrder(

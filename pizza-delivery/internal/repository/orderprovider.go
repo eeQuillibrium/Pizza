@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eeQuillibrium/pizza-delivery/internal/domain/models"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -21,31 +20,23 @@ func NewOPRepo(
 }
 func (r *OPRepo) StoreOrder(
 	ctx context.Context,
-	order *models.Order,
+	orderId int,
+	userId int,
+	price int,
+	state string,
+	unitNums string,
+	amount string,
 ) error {
-	orderKey := fmt.Sprintf("order:%d", order.OrderId)
-	if err := r.rClient.HMSet(
+	return r.rClient.HSet(
 		ctx,
-		orderKey,
-		"orderid", order.OrderId,
-		"userid", order.UserId,
-		"price", order.Price,
-		"state", order.State,
-		"len", len(order.Units),
-	).Err(); err != nil {
-		return err
-	}
-
-	for i := 0; i < len(order.Units); i++ {
-		if err := r.rClient.HMSet(ctx, orderKey,
-			fmt.Sprintf("unitnum%d", i), order.Units[i].Unitnum,
-			fmt.Sprintf("piece%d", i), order.Units[i].Piece).
-			Err(); err != nil {
-			return err
-		}
-	}
-
-	return nil
+		fmt.Sprintf("order:%d", orderId),
+		"orderid", orderId,
+		"userid", userId,
+		"price", price,
+		"state", state,
+		"unitnums", unitNums,
+		"amount", amount,
+	).Err()
 }
 
 func (r *OPRepo) DeleteOrder(

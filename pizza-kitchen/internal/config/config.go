@@ -15,9 +15,9 @@ type Config struct {
 }
 
 type GRPCApp struct {
-	ClientGate    ClientGate     `yaml:"clientgate"`
+	ClientGate     ClientGate     `yaml:"clientgate"`
 	ClientDelivery ClientDelivery `yaml:"clientdelivery"`
-	Server        Server         `yaml:"server"`
+	Server         Server         `yaml:"server"`
 }
 type ClientGate struct {
 	Port int `yaml:"port"`

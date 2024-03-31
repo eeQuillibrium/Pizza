@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/eeQuillibrium/pizza-kitchen/internal/domain/models"
 	"github.com/eeQuillibrium/pizza-kitchen/internal/repository"
@@ -19,26 +19,20 @@ func NewKitchenService(
 	return &KitchenService{repo: repo}
 }
 
-func (s *KitchenService) DeleteOrder(
+func (s *KitchenService) CancelOrder(
 	ctx context.Context,
 	orderId int,
 ) error {
-	return s.repo.DeleteOrder(ctx, orderId)
+	return s.repo.CancelOrder(ctx, orderId)
 }
-func (s *KitchenService) CancelOrder(
-	ctx context.Context,
-	order *models.Order,
-) error {
-	return s.repo.DeleteOrder(ctx, order.OrderId)
-}
-func (s *KitchenService) GetOrders(
+func (s *KitchenService) GetCurrentOrders(
 	ctx context.Context,
 ) ([]*models.Order, error) {
-	orders := s.repo.GetOrders(ctx)
+	ordersMap := s.repo.GetCurrentOrders(ctx)
 
 	res := []*models.Order{}
-	for i := 0; i < len(orders); i++ {
-		order, err := getOrder(orders[i])
+	for i := 0; i < len(ordersMap); i++ {
+		order, err := s.getOrder(ordersMap[i])
 		if err != nil {
 			return res, err
 		}
@@ -47,43 +41,50 @@ func (s *KitchenService) GetOrders(
 
 	return res, nil
 }
-func getOrder(ordermap map[string]string) (*models.Order, error) {
-	price, err := strconv.Atoi(ordermap["price"])
+func (s *KitchenService) getOrder(orderMap map[string]string) (*models.Order, error) {
+	price, err := strconv.Atoi(orderMap["price"])
 	if err != nil {
 		return nil, err
 	}
-	userId, err := strconv.Atoi(ordermap["userid"])
+	userId, err := strconv.Atoi(orderMap["userid"])
 	if err != nil {
 		return nil, err
 	}
-	len, err := strconv.Atoi(ordermap["len"])
+	orderid, err := strconv.Atoi(orderMap["orderid"])
 	if err != nil {
 		return nil, err
 	}
-	orderid, err := strconv.Atoi(ordermap["orderid"])
+	units, err := s.translateUnits(orderMap["unitnums"], orderMap["amount"])
 	if err != nil {
 		return nil, err
 	}
-	units := []models.PieceUnitnum{}
-	for i := 0; i < len; i++ {
-		unitnum, err := strconv.Atoi(ordermap[fmt.Sprintf("unitnum%d", i)])
-		if err != nil {
-			return nil, err
-		}
-		piece, err := strconv.Atoi(ordermap[fmt.Sprintf("piece%d", i)])
-		if err != nil {
-			return nil, err
-		}
-		units = append(units, models.PieceUnitnum{
-			Unitnum: unitnum,
-			Piece:   piece,
-		})
-	}
+
 	return &models.Order{
 		OrderId: orderid,
 		Price:   price,
 		UserId:  userId,
 		Units:   units,
-		State:   ordermap["state"],
+		State:   orderMap["state"],
 	}, nil
+}
+func (s *KitchenService) translateUnits(
+	unitNumsS string,
+	amountS string,
+) ([]models.PieceUnitnum, error) {
+	unitNums := strings.Split(unitNumsS, unitSep)
+	amount := strings.Split(amountS, unitSep)
+	units := []models.PieceUnitnum{}
+	for i := 0; i < len(unitNums); i++ {
+		unitnum, err := strconv.Atoi(unitNums[i])
+		if err != nil {
+			return nil, err
+		}
+		amount, err := strconv.Atoi(amount[i])
+		if err != nil {
+			return nil, err
+		}
+
+		units = append(units, models.PieceUnitnum{Unitnum: unitnum, Piece: amount})
+	}
+	return units, nil
 }

@@ -3,24 +3,30 @@ package repository
 import (
 	"context"
 
-	"github.com/eeQuillibrium/pizza-kitchen/internal/domain/models"
 	"github.com/redis/go-redis/v9"
 )
 
 type OrderProvider interface {
 	StoreOrder(
 		ctx context.Context,
-		order *models.Order,
+		orderId int,
+		userId int,
+		price int,
+		state string,
+		unitNums string,
+		amount string,
 	) error
-	DeleteOrder(
+	CancelOrder(
 		ctx context.Context,
 		orderId int,
 	) error
 }
 
 type Kitchen interface {
-	GetOrders(ctx context.Context) []map[string]string
-	DeleteOrder(
+	GetCurrentOrders(
+		ctx context.Context,
+	) []map[string]string
+	CancelOrder(
 		ctx context.Context,
 		orderId int,
 	) error
@@ -34,6 +40,6 @@ type Repository struct {
 func New(rClient *redis.Client) *Repository {
 	return &Repository{
 		OrderProvider: NewOPRepo(rClient),
-		Kitchen: NewKitchenRepo(rClient),
+		Kitchen:       NewKitchenRepo(rClient),
 	}
 }

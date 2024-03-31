@@ -44,13 +44,13 @@ func (s *OPService) createUnitRecords(
 	ctx context.Context,
 	units []*grpc_orders.SendOrderReq_PieceUnitnum,
 ) (string, string) {
-	unitNums := ""
-	for i := 0; i < len(units)-1; i++ {
-		unitNums += fmt.Sprintf("%d,", units[i].Unitnum)
+	unitNums := fmt.Sprintf("%d",units[0].Unitnum)
+	for i := 1; i < len(units); i++ {
+		unitNums += fmt.Sprintf("%s%d", unitSep, units[i].Unitnum)
 	}
-	pieceNums := ""
-	for i := 0; i < len(units)-1; i++ {
-		pieceNums += fmt.Sprintf("%d,", units[i].Piece)
+	pieceNums := fmt.Sprintf("%d",units[0].Piece)
+	for i := 1; i < len(units); i++ {
+		pieceNums += fmt.Sprintf("%s%d",unitSep, units[i].Piece)
 	}
 	return unitNums, pieceNums
 }

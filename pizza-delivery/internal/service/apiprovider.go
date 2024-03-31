@@ -26,10 +26,10 @@ func (s *APIPService) DeleteOrder(
 ) error {
 	return s.repo.DeleteOrder(ctx, orderId)
 }
-func (s *APIPService) GetOrders(
+func (s *APIPService) GetCurrentOrders(
 	ctx context.Context,
 ) ([]*models.Order, error) {
-	orders := s.repo.GetOrders(ctx)
+	orders := s.repo.GetCurrentOrders(ctx)
 	res := []*models.Order{}
 	for i := 0; i < len(orders); i++ {
 		order, err := getOrder(orders[i])

@@ -20,7 +20,7 @@ type OrderProvider interface {
 		state string,
 		userId int,
 		orderId int,
-	) error 
+	) error
 	CancelOrder(
 		ctx context.Context,
 		userId int,
@@ -49,7 +49,7 @@ type APIProvider interface {
 		amount string,
 		state string,
 		userId int,
-	) error 
+	) (int, error)
 	StoreReview(
 		ctx context.Context,
 		userId int,
@@ -57,10 +57,10 @@ type APIProvider interface {
 	) error
 	StoreUser(
 		ctx context.Context,
-		address string, 
+		address string,
 		email string,
 		phone string,
-	) error 
+	) error
 }
 
 type Repository struct {

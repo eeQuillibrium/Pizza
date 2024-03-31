@@ -60,11 +60,11 @@ func (r *APIPRepo) CreateOrder(
 	amount string,
 	state string,
 	userId int,
-) error {
+) (int, error) {
 
 	orderId, err := r.storeOrder(ctx, price, unitNums, amount, state, userId)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	if err = r.rClient.HSet(
@@ -77,10 +77,10 @@ func (r *APIPRepo) CreateOrder(
 		"unitnums", unitNums,
 		"amount", amount,
 	).Err(); err != nil {
-		return err
+		return 0, err
 	}
 
-	return r.updateLast(ctx, userId, orderId)
+	return orderId, r.updateLast(ctx, userId, orderId)
 }
 func (r *APIPRepo) storeOrder(
 	ctx context.Context,
@@ -175,20 +175,21 @@ func (r *APIPRepo) GetOrdersHistory(
 	ctx context.Context,
 	userId int,
 ) ([]*models.Order, error) {
-	queryOrders := fmt.Sprintf("SELECT * FROM %s WHERE user_id = '$1' AND state <> ORDERED", "orders")
+	queryOrders := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1 AND state <> 'ORDERED'", "orders")
 
 	type OrderDB struct {
 		OrderId  int    `db:"order_id"`
-		UserId   int    `db:"user_id"`
 		Price    int    `db:"price"`
 		UnitNums string `db:"unit_nums"`
 		Amount   string `db:"amount"`
+		State    string `db:"state"`
+		UserId   int    `db:"user_id"`
 	}
+
 	orders := []OrderDB{}
 
-	err := r.DB.GetContext(ctx, &orders, queryOrders, userId)
-	if err != nil {
-		return nil, nil
+	if err := r.DB.Select(&orders, queryOrders, userId); err != nil {
+		return nil, err
 	}
 
 	res := []*models.Order{}
@@ -206,9 +207,10 @@ func (r *APIPRepo) GetOrdersHistory(
 		}
 		res = append(res, order)
 	}
-	r.log.SugaredLogger.Infof("orders: %v", res)
+	
 	return res, nil
 }
+
 func accessUnits(unitNumsStr string, amountStr string) ([]models.PieceUnitnum, error) {
 	unitNums := strings.Split(unitNumsStr, ",")
 	amountNums := strings.Split(amountStr, ",")

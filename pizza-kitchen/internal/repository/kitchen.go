@@ -11,18 +11,22 @@ type KitchenRepo struct {
 	rClient *redis.Client
 }
 
-func NewKitchenRepo(rClient *redis.Client) *KitchenRepo {
+func NewKitchenRepo(
+	rClient *redis.Client,
+) *KitchenRepo {
 	return &KitchenRepo{
 		rClient: rClient,
 	}
 }
-func (r *KitchenRepo) DeleteOrder(
+func (r *KitchenRepo) CancelOrder(
 	ctx context.Context,
 	orderId int,
 ) error {
 	return r.rClient.Del(ctx, fmt.Sprintf("order:%d", orderId)).Err()
 }
-func (r *KitchenRepo) GetOrders(ctx context.Context) []map[string]string {
+func (r *KitchenRepo) GetCurrentOrders(
+	ctx context.Context,
+) []map[string]string {
 	var (
 		cursor uint64
 		match  string

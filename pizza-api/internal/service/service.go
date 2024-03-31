@@ -32,7 +32,7 @@ type APIProvider interface {
 	CreateOrder(
 		ctx context.Context,
 		order *models.Order,
-	) error
+	) (int, error)
 	StoreUser(
 		ctx context.Context,
 		user *models.User,
