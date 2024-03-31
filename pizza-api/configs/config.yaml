@@ -6,7 +6,9 @@ grpc:
     port: 44044
   kitchen:
     port: 44045
-  
+  delivery:
+    port: 44047
+
   server:
     port: 44046
 
@@ -21,6 +23,6 @@ repo:
     sslmode: "disable"
     host: "localhost"
     port: 5433
-    dbname: "orders"
+    dbname: "postgres"
     username: "postgres"
   

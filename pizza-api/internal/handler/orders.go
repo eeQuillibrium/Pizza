@@ -15,35 +15,70 @@ func (h *Handler) ordersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello from /orders/ route"))
 }
 
-func (h *Handler) sendKitchenHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) createOrderHandler(w http.ResponseWriter, r *http.Request) {
 
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
-		h.log.SugaredLogger.Fatalf("order json reading problem: %w", err)
 		w.WriteHeader(http.StatusBadRequest)
+		h.log.SugaredLogger.Fatalf("order json reading problem: %w", err)
 	}
 	if len(b) == 0 {
-		h.log.SugaredLogger.Fatal("empty req body")
 		w.WriteHeader(http.StatusBadRequest)
+		h.log.SugaredLogger.Fatal("empty req body")
 	}
 
 	var order models.Order
-	json.Unmarshal(b, &order)
+	if err := json.Unmarshal(b, &order); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		h.log.SugaredLogger.Fatalf("order json reading problem: %w", err)
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
-	h.service.APIProvider.CreateOrder(ctx, &order)
-
-	if _, err = h.GRPCApp.KitchenOrderSender.SendOrder(
-		ctx,
-		orderAccessor(&order),
-	); err != nil {
+	order.State = grpc_orders.SendOrderReq_ORDERED.String()
+	if err := h.service.APIProvider.CreateOrder(ctx, &order); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		h.log.SugaredLogger.Fatalf("error with sendorder: %w", err)
-		w.WriteHeader(http.StatusBadGateway)
 	}
 
-	h.log.SugaredLogger.Info("successful order storing in kitchen")
+	order.State = grpc_orders.SendOrderReq_COOK.String()
+	if _, err := h.GRPCApp.KitchenOS.SendOrder(ctx, orderAccessor(&order)); err != nil {
+		w.WriteHeader(http.StatusBadGateway)
+		h.log.SugaredLogger.Fatalf("error with sendorder: %w", err)
+	}
+}
+func (h *Handler) ordersCancelHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		h.log.SugaredLogger.Fatalf("body readeing problem occured: %w", err)
+	}
+
+	order := models.Order{}
+	json.Unmarshal(data, &order)
+
+	grpcOrder := orderAccessor(&order)
+	grpcOrder.State = grpc_orders.SendOrderReq_CANCELLED
+	if _, err := h.GRPCApp.KitchenOS.SendOrder(ctx, grpcOrder); err != nil {
+		w.WriteHeader(http.StatusBadGateway)
+		h.log.SugaredLogger.Fatalf("error kitchen order deleting: %v", err)
+	}
+
+	if _, err := h.GRPCApp.DeliveryOS.SendOrder(ctx, grpcOrder); err != nil {
+		w.WriteHeader(http.StatusBadGateway)
+		h.log.SugaredLogger.Fatalf("error delivery order deleting: %v", err)
+	}
+
+	if err := h.service.APIProvider.CancelOrder(ctx, &order); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		h.log.SugaredLogger.Fatalf("error int order deleting: %w", err)
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handler) ordersCurrentHandler(w http.ResponseWriter, r *http.Request) {
@@ -63,14 +98,14 @@ func (h *Handler) ordersCurrentHandler(w http.ResponseWriter, r *http.Request) {
 
 	orders, err := h.service.GetCurrentOrders(ctx, userId.UserId)
 	if err != nil {
-		h.log.SugaredLogger.Fatalf("getting order problem %w", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		h.log.SugaredLogger.Fatalf("getting order problem %w", err)
 	}
 
 	json, err := json.Marshal(orders)
 	if err != nil {
-		h.log.SugaredLogger.Fatalf("marshaling problem %w", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		h.log.SugaredLogger.Fatalf("marshaling problem %w", err)
 	}
 
 	w.Write(json)
@@ -91,16 +126,17 @@ func (h *Handler) ordersHistoryHandler(w http.ResponseWriter, r *http.Request) {
 		UserId int `json:"userid"`
 	}{}
 	json.Unmarshal(data, &userId)
-
+	h.log.SugaredLogger.Infof("userid: %d", userId.UserId)
 	orders, err := h.service.APIProvider.GetOrdersHistory(ctx, userId.UserId)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		h.log.SugaredLogger.Fatalf("error with get history: %w", err)
 	}
 
 	json, err := json.Marshal(orders)
 	if err != nil {
-		h.log.SugaredLogger.Fatalf("marshaling problem %w", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		h.log.SugaredLogger.Fatalf("marshaling problem %w", err)
 	}
 
 	w.Write(json)

@@ -23,6 +23,7 @@ type OrderSender interface {
 type GRPCApp struct {
 	log           *logger.Logger
 	GatewayClient OrderSender
+	KitchenClient OrderSender
 	OrderServer   *grpc.Server
 }
 
@@ -30,9 +31,13 @@ func New(
 	log *logger.Logger,
 	orderProvider service.OrderProvider,
 	gatewayPort int,
+	kitchenPort int,
 ) *GRPCApp {
-	gatewayOrderingConn := setConn(log, gatewayPort)
-	gatewayClient := grpcclient.NewAPIClient(grpc_orders.NewOrderingClient(gatewayOrderingConn))
+	gatewayConn := setConn(log, gatewayPort)
+	gatewayClient := grpcclient.NewAPIClient(grpc_orders.NewOrderingClient(gatewayConn), gatewayConn)
+
+	kitchenConn := setConn(log, kitchenPort)
+	kitchenClient := grpcclient.NewKitchenClient(kitchenConn, grpc_orders.NewOrderingClient(kitchenConn))
 
 	orderServer := grpc.NewServer()
 	grpcserver.Register(orderServer, orderProvider)
@@ -40,6 +45,7 @@ func New(
 	return &GRPCApp{
 		log:           log,
 		GatewayClient: gatewayClient,
+		KitchenClient: kitchenClient,
 		OrderServer:   orderServer,
 	}
 }

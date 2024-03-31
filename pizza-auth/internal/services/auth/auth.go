@@ -20,12 +20,12 @@ type Auth struct {
 type UserProvider interface {
 	CreateUser(
 		ctx context.Context,
-		login string,
+		phone string,
 		passHash string,
 	) (userId int64, err error)
 	GetUser(
 		ctx context.Context,
-		login string,
+		phone string,
 	) (user models.User, err error)
 }
 
@@ -41,7 +41,7 @@ func New(
 
 func (a *Auth) Login(
 	ctx context.Context,
-	login string,
+	phone string,
 	pass string,
 ) (string, error) {
 	log.Print("starting to login user...")
@@ -52,7 +52,7 @@ func (a *Auth) Login(
 		return "", err
 	}
 
-	user, err := a.userProvider.GetUser(ctx, login)
+	user, err := a.userProvider.GetUser(ctx, phone)
 	if err != nil {
 		return "", err
 	}
@@ -74,7 +74,7 @@ func (a *Auth) Login(
 
 func (a *Auth) Register(
 	ctx context.Context,
-	login string,
+	phone string,
 	pass string,
 ) (int64, error) {
 	log.Print("trying to create user...")
@@ -85,7 +85,7 @@ func (a *Auth) Register(
 		return 0, err
 	}
 
-	userId, err := a.userProvider.CreateUser(ctx, login, hash)
+	userId, err := a.userProvider.CreateUser(ctx, phone, hash)
 	if err != nil {
 		log.Fatalf("user creating error: %v", err)
 	}

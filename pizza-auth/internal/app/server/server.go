@@ -13,12 +13,12 @@ import (
 type Auth interface {
 	Login(
 		ctx context.Context,
-		login string,
+		phone string,
 		pass string,
 	) (string, error)
 	Register(
 		ctx context.Context,
-		login string,
+		phone string,
 		pass string,
 	) (int64, error)
 	IsAdmin(
@@ -42,11 +42,11 @@ func (s *serverAPI) Login(
 	req *nikita_auth1.LoginRequest,
 ) (*nikita_auth1.LoginResponse, error) {
 
-	if err := validateLogin(req.GetAppId(), req.GetLogin(), req.GetPass()); err != nil {
+	if err := validateLogin(req.GetAppId(), req.GetPhone(), req.GetPass()); err != nil {
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
-	jwt, err := s.auth.Login(ctx, req.GetLogin(), req.GetPass())
+	jwt, err := s.auth.Login(ctx, req.GetPhone(), req.GetPass())
 	if err != nil {
 		return nil, err
 	}
@@ -60,11 +60,11 @@ func (s *serverAPI) Register(
 	req *nikita_auth1.RegRequest,
 ) (*nikita_auth1.RegResponse, error) {
 
-	if err := validateRegister(req.GetLogin(), req.GetPass()); err != nil {
+	if err := validateRegister(req.GetPhone(), req.GetPass()); err != nil {
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
-	userId, err := s.auth.Register(ctx, req.GetLogin(), req.GetPass())
+	userId, err := s.auth.Register(ctx, req.GetPhone(), req.GetPass())
 	if err != nil {
 		return nil, err
 	}

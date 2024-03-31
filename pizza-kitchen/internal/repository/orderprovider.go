@@ -48,3 +48,10 @@ func (r *OPRepo) StoreOrder(
 
 	return nil
 }
+
+func (r *OPRepo) DeleteOrder(
+	ctx context.Context,
+	orderId int,
+) error {
+	return r.rClient.Del(ctx, fmt.Sprintf("order:%d", orderId)).Err()
+}

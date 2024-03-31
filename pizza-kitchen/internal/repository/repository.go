@@ -12,6 +12,10 @@ type OrderProvider interface {
 		ctx context.Context,
 		order *models.Order,
 	) error
+	DeleteOrder(
+		ctx context.Context,
+		orderId int,
+	) error
 }
 
 type Kitchen interface {

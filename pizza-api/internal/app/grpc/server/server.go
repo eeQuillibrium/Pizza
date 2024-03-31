@@ -24,6 +24,8 @@ func (s *GRPCServer) SendOrder(
 	ctx context.Context,
 	in *grpc_orders.SendOrderReq,
 ) (*grpc_orders.EmptyOrderResp, error) {
-	err := s.service.ProvideOrder(ctx, in)
-	return &grpc_orders.EmptyOrderResp{}, err
+	if in.GetState().String() == "CANCELLED" {
+		return &grpc_orders.EmptyOrderResp{}, s.service.CancelOrder(ctx, in)
+	}
+	return &grpc_orders.EmptyOrderResp{}, s.service.ProvideOrder(ctx, in)
 }

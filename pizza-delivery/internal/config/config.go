@@ -17,10 +17,14 @@ type REST struct {
 	Port int `yaml:"port"`
 }
 type GRPC struct {
-	Client Client `yaml:"client"`
-	Server Server `yaml:"server"`
+	KitchenClient KitchenClient `yaml:"client"`
+	GatewayClient GatewayClient
+	Server        Server `yaml:"server"`
 }
-type Client struct {
+type KitchenClient struct {
+	Port int `yaml:"port"`
+}
+type GatewayClient struct {
 	Port int `yaml:"port"`
 }
 type Server struct {

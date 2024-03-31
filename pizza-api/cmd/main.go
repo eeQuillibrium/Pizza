@@ -15,6 +15,7 @@ import (
 	"github.com/eeQuillibrium/pizza-api/internal/repository"
 	"github.com/eeQuillibrium/pizza-api/internal/service"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/joho/godotenv"
@@ -53,7 +54,7 @@ func main() {
 
 	repo := repository.New(log, db, rdb)
 	services := service.New(log, repo)
-	handl := handler.New(log, services, cfg.GRPC.Auth.Port, cfg.GRPC.Kitchen.Port, services)
+	handl := handler.New(log, services, cfg.GRPC.Auth.Port, cfg.GRPC.Kitchen.Port, cfg.GRPC.Delivery.Port)
 
 	restapp := restapp.New(log, cfg.Rest.Port, handl.InitRoutes())
 	app := app.New(log, restapp, handl.GRPCApp)

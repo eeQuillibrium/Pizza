@@ -39,10 +39,11 @@ type OrderSender interface {
 }
 
 type GRPCApp struct {
-	log                *logger.Logger
-	Auth               Auth
-	KitchenOrderSender OrderSender
-	OrderServer        *grpc.Server
+	log         *logger.Logger
+	Auth        Auth
+	KitchenOS   OrderSender
+	DeliveryOS  OrderSender
+	OrderServer *grpc.Server
 	//other grpc
 }
 
@@ -50,6 +51,7 @@ func New(
 	log *logger.Logger,
 	authport int,
 	kitchenport int,
+	deliveryport int,
 	kService service.OrderProvider,
 ) *GRPCApp {
 	log.SugaredLogger.Info("trying to set connection with authgrpc server...")
@@ -60,17 +62,23 @@ func New(
 
 	log.SugaredLogger.Info("trying to set connection with kitchen server...")
 	kitchenconn := setConn(log, kitchenport)
-	kitchenOrderSender := client.NewKitchen(kitchenport, kitchenconn)
+	kitchenOS := client.NewKitchen(kitchenport, kitchenconn)
 	log.SugaredLogger.Info("kitchen connect successful!")
+
+	log.SugaredLogger.Info("trying to set connection with delivery server...")
+	deliveryConn := setConn(log, deliveryport)
+	deliveryOS := client.NewDelivery(deliveryport, deliveryConn)
+	log.SugaredLogger.Info("delivery connect successful!")
 
 	serv := grpc.NewServer()
 	grpcserver.Register(serv, kService)
 
 	return &GRPCApp{
-		log:                log,
-		Auth:               auth,
-		KitchenOrderSender: kitchenOrderSender,
-		OrderServer:        serv,
+		log:         log,
+		Auth:        auth,
+		KitchenOS:   kitchenOS,
+		DeliveryOS:  deliveryOS,
+		OrderServer: serv,
 	}
 }
 

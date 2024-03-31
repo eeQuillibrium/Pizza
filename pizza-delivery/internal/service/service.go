@@ -11,9 +11,13 @@ import (
 
 type OrderProvider interface {
 	StoreOrder(
-		context.Context,
-		*grpc_orders.SendOrderReq,
-	) (*grpc_orders.EmptyOrderResp, error)
+		ctx context.Context,
+		in *grpc_orders.SendOrderReq,
+	) error
+	CancelOrder(
+		ctx context.Context,
+		in *grpc_orders.SendOrderReq,
+	) error
 }
 
 type APIProvider interface {

@@ -15,6 +15,10 @@ type OrderProvider interface {
 		ctx context.Context,
 		in *grpc_orders.SendOrderReq,
 	) error
+	CancelOrder(
+		ctx context.Context,
+		in *grpc_orders.SendOrderReq,
+	) error
 }
 type APIProvider interface {
 	GetCurrentOrders(
@@ -29,14 +33,17 @@ type APIProvider interface {
 		ctx context.Context,
 		order *models.Order,
 	) error
-	DeleteOrder(
+	StoreUser(
+		ctx context.Context,
+		user *models.User,
+	) error
+	CancelOrder(
 		ctx context.Context,
 		order *models.Order,
 	) error
 	CreateReview(
 		ctx context.Context,
-		userId int,
-		reviewText string,
+		review *models.Review,
 	) error
 }
 

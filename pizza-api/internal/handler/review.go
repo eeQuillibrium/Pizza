@@ -6,6 +6,8 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/eeQuillibrium/pizza-api/internal/domain/models"
 )
 
 func (h *Handler) reviewHandler(w http.ResponseWriter, r *http.Request) {
@@ -22,10 +24,7 @@ func (h *Handler) reviewSendHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	review := struct {
-		UserId int    `json:"userid"`
-		Text   string `json:"text"`
-	}{}
+	review := models.Review{}
 
 	err = json.Unmarshal(data, &review)
 	if err != nil {
@@ -33,7 +32,7 @@ func (h *Handler) reviewSendHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	err = h.service.APIProvider.CreateReview(ctx, review.UserId, review.Text)
+	err = h.service.APIProvider.CreateReview(ctx, &review)
 	if err != nil {
 		h.log.SugaredLogger.Fatalf("create review error: %w", err)
 		w.WriteHeader(http.StatusInternalServerError)

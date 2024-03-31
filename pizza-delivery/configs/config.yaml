@@ -2,9 +2,10 @@ rest:
   port: 8082
 
 grpc:
-  client:
+  gatewayclient:
     port: 44046
-    
+  kitchenclient:
+    port: 44045
   server:
     port: 44047
 

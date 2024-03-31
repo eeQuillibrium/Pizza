@@ -13,15 +13,24 @@ type OrderProvider interface {
 		ctx context.Context,
 		in *grpc_orders.SendOrderReq,
 	) error
+	CancelOrder(
+		ctx context.Context,
+		in *grpc_orders.SendOrderReq,
+	) error
 }
 type Kitchen interface {
-	GetOrders(ctx context.Context) ([]*models.Order, error)
-	DeleteOrder(ctx context.Context, orderId int) error
-}
-
-type KitchenRedisService interface {
-	OrderProvider
-	Kitchen
+	GetOrders(
+		ctx context.Context,
+	) ([]*models.Order, error)
+	CancelOrder(
+		ctx context.Context,
+		order *models.Order,
+	) error
+	DeleteOrder(
+		ctx context.Context,
+		orderId int,
+	) error
+	
 }
 
 type Service struct {

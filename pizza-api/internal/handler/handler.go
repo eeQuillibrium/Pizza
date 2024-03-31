@@ -16,11 +16,11 @@ type Handler struct {
 func New(
 	log *logger.Logger,
 	service *service.Service,
-	authport int,
-	kitchenport int,
-	kService service.OrderProvider,
+	authPort int,
+	kitchenPort int,
+	deliveryPort int,
 ) *Handler {
-	grpcapp := grpcapp.New(log, authport, kitchenport, kService)
+	grpcapp := grpcapp.New(log, authPort, kitchenPort, deliveryPort, service.OrderProvider)
 	return &Handler{
 		log:     log,
 		service: service,
@@ -34,7 +34,8 @@ func (h *Handler) InitRoutes() *mux.Router {
 	r.HandleFunc("/home", h.homeHandler)
 
 	r.HandleFunc("/orders", h.ordersHandler)
-	r.HandleFunc("/orders/send/kitchen", h.sendKitchenHandler)
+	r.HandleFunc("/orders/create", h.createOrderHandler)
+	r.HandleFunc("/orders/cancel", h.ordersCancelHandler)
 	r.HandleFunc("/orders/current", h.ordersCurrentHandler)
 	r.HandleFunc("/orders/history", h.ordersHistoryHandler)
 

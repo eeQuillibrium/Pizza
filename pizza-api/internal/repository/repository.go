@@ -11,34 +11,56 @@ import (
 
 // OrderProvider - OP
 type OrderProvider interface {
+	//from grpc
 	StoreOrder(
 		ctx context.Context,
-		order *models.Order,
-	) error //from grpc
+		price int,
+		unitNums string,
+		amount string,
+		state string,
+		userId int,
+		orderId int,
+	) error 
+	CancelOrder(
+		ctx context.Context,
+		userId int,
+		orderId int,
+	) error
 }
 
 type APIProvider interface {
 	GetCurrentOrders(
 		ctx context.Context,
 		userId int,
-	) ([]*models.Order, error)
+	) ([]map[string]string, error)
 	GetOrdersHistory(
 		ctx context.Context,
 		userId int,
 	) ([]*models.Order, error)
-	DeleteOrder(
+	CancelOrder(
 		ctx context.Context,
-		order *models.Order,
+		orderId int,
+		userId int,
 	) error
-	StoreOrder(
+	CreateOrder(
 		ctx context.Context,
-		order *models.Order,
-	) error //order from client
+		price int,
+		unit_nums string,
+		amount string,
+		state string,
+		userId int,
+	) error 
 	StoreReview(
 		ctx context.Context,
 		userId int,
 		reviewText string,
 	) error
+	StoreUser(
+		ctx context.Context,
+		address string, 
+		email string,
+		phone string,
+	) error 
 }
 
 type Repository struct {

@@ -13,6 +13,10 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const (
+	zeroInt = 0
+)
+
 type APIPRepo struct {
 	log     *logger.Logger
 	rClient *redis.Client
@@ -34,139 +38,148 @@ func NewAPIPRepo(
 func (r *APIPRepo) GetCurrentOrders(
 	ctx context.Context,
 	userId int,
-) ([]*models.Order, error) {
-	res := []*models.Order{}
+) ([]map[string]string, error) {
+	var res []map[string]string
 
 	ordersMap := r.rClient.HGetAll(ctx, fmt.Sprintf("user:%d", userId)).Val()
 
-	for _, orderKey := range ordersMap {
-		order, err := getOrder(r.rClient.HGetAll(ctx, orderKey).Val())
-		if err != nil {
-			return res, err
+	for orderKey, orderVal := range ordersMap {
+		if orderKey == "last" {
+			continue
 		}
-		res = append(res, order)
+		res = append(res, r.rClient.HGetAll(ctx, orderVal).Val())
 	}
 
 	return res, nil
 }
-func getOrder(orderMap map[string]string) (*models.Order, error) {
-	price, err := strconv.Atoi(orderMap["price"])
-	if err != nil {
-		return nil, err
-	}
-	userId, err := strconv.Atoi(orderMap["userid"])
-	if err != nil {
-		return nil, err
-	}
-	len, err := strconv.Atoi(orderMap["len"])
-	if err != nil {
-		return nil, err
-	}
-	orderid, err := strconv.Atoi(orderMap["orderid"])
-	if err != nil {
-		return nil, err
-	}
-	units := []models.PieceUnitnum{}
-	for i := 0; i < len; i++ {
-		unitnum, err := strconv.Atoi(orderMap[fmt.Sprintf("unitnum%d", i)])
-		if err != nil {
-			return nil, err
-		}
-		piece, err := strconv.Atoi(orderMap[fmt.Sprintf("piece%d", i)])
-		if err != nil {
-			return nil, err
-		}
-		units = append(units, models.PieceUnitnum{
-			Unitnum: unitnum,
-			Piece:   piece,
-		})
-	}
-	return &models.Order{
-		OrderId: orderid,
-		Price:   price,
-		UserId:  userId,
-		Units:   units,
-		State:   orderMap["state"],
-	}, nil
-}
 
-func (r *APIPRepo) StoreOrder(
+func (r *APIPRepo) CreateOrder(
 	ctx context.Context,
-	order *models.Order,
+	price int,
+	unitNums string,
+	amount string,
+	state string,
+	userId int,
 ) error {
-	var err error
-	orderKey := fmt.Sprintf("order:%d", order.OrderId)
 
-	if err = r.storeOrder(ctx, order, orderKey); err != nil {
+	orderId, err := r.storeOrder(ctx, price, unitNums, amount, state, userId)
+	if err != nil {
 		return err
 	}
 
-	userKey := fmt.Sprintf("user:%d", order.UserId)
-
-	var last int = -1
-
-	lastStr := r.rClient.HGetAll(ctx, userKey).Val()["last"]
-	if lastStr != "" {
-		last, err = strconv.Atoi(lastStr)
-		if err != nil {
-			return err
-		}
-	}
-
-	if err := r.rClient.HMSet(ctx, userKey,
-		fmt.Sprintf("order:%d", last+1), orderKey,
-		"last", last+1).
-		Err(); err != nil {
-		return err
-	}
-
-	return nil
-}
-func (r *APIPRepo) storeOrder(
-	ctx context.Context,
-	order *models.Order,
-	orderKey string,
-) error {
-	if err := r.rClient.HMSet(
+	if err = r.rClient.HSet(
 		ctx,
-		orderKey,
-		"orderid", order.OrderId,
-		"userid", order.UserId,
-		"price", order.Price,
-		"state", order.State,
-		"len", len(order.Units),
+		fmt.Sprintf("order:%d", orderId),
+		"orderid", orderId,
+		"userid", userId,
+		"price", price,
+		"state", state,
+		"unitnums", unitNums,
+		"amount", amount,
 	).Err(); err != nil {
 		return err
 	}
 
-	for i := 0; i < len(order.Units); i++ {
-		if err := r.rClient.HMSet(ctx, orderKey,
-			fmt.Sprintf("unitnum%d", i), order.Units[i].Unitnum,
-			fmt.Sprintf("piece%d", i), order.Units[i].Piece).
-			Err(); err != nil {
+	return r.updateLast(ctx, userId, orderId)
+}
+func (r *APIPRepo) storeOrder(
+	ctx context.Context,
+	price int,
+	unitNums string,
+	amount string,
+	state string,
+	userId int,
+) (int, error) {
+	q := fmt.Sprintf("INSERT INTO %s (price, unit_nums, amount, state, user_id) "+
+		"VALUES ($1, $2, $3, $4, $5) RETURNING order_id", "orders")
+
+	var orderId int
+	row := r.DB.QueryRow(q, price, unitNums, amount, state, userId)
+	if err := row.Scan(&orderId); err != nil {
+		return zeroInt, err
+	}
+	return orderId, nil
+}
+func (r *APIPRepo) updateLast(
+	ctx context.Context,
+	userId int,
+	orderId int,
+) error {
+	userKey := fmt.Sprintf("user:%d", userId)
+	var err error
+	var last int = -1
+	if is := r.rClient.Exists(ctx, userKey).Val(); is == 1 {
+		last, err = strconv.Atoi(r.rClient.HGet(ctx, userKey, "last").Val())
+		if err != nil {
 			return err
 		}
 	}
 
-	return nil
+	return r.rClient.HSet(ctx, userKey,
+		fmt.Sprintf("order:%d", last+1), fmt.Sprintf("order:%d", orderId),
+		"last", last+1).
+		Err()
 }
 
-func (r *APIPRepo) DeleteOrder(
+func (r *APIPRepo) CancelOrder(
 	ctx context.Context,
-	order *models.Order,
+	orderId int,
+	userId int,
 ) error {
+	if err := r.updateOrder(ctx, orderId); err != nil {
+		return err
+	}
 
-	return nil
+	userKey := fmt.Sprintf("user:%d", userId)
+	orderKey := fmt.Sprintf("order:%d", orderId)
+
+	if err := r.rClient.HDel(ctx, userKey, orderKey).
+		Err(); err != nil {
+		return err
+	}
+	if err := r.rClient.Del(ctx, orderKey).
+		Err(); err != nil {
+		return err
+	}
+
+	lastVal := r.rClient.HGet(ctx, userKey, "last").Val()
+	if lastVal == "0" {
+		return r.rClient.Del(ctx, userKey).Err()
+	}
+
+	last, err := strconv.Atoi(lastVal)
+	if err != nil {
+		return err
+	}
+
+	return r.rClient.HSet(ctx, userKey, "last", last-1).Err()
+}
+func (r *APIPRepo) updateOrder(
+	ctx context.Context,
+	orderId int,
+) error {
+	if isExist := r.rClient.Exists(ctx, fmt.Sprintf("order:%d", orderId)).
+		Val(); isExist == 0 {
+		return errors.New("there's no order with this id")
+	}
+
+	query := fmt.Sprintf("UPDATE %s SET state = 'CANCELLED'"+
+		" WHERE order_id = $1", "orders")
+
+	tx := r.DB.MustBegin()
+	tx.MustExecContext(ctx, query, orderId)
+	return tx.Commit()
 }
 
 func (r *APIPRepo) GetOrdersHistory(
 	ctx context.Context,
 	userId int,
 ) ([]*models.Order, error) {
-	queryOrders := fmt.Sprintf("SELECT * FROM %s WHERE user_id = '$1'", "userOrder")
+	queryOrders := fmt.Sprintf("SELECT * FROM %s WHERE user_id = '$1' AND state <> ORDERED", "orders")
 
 	type OrderDB struct {
 		OrderId  int    `db:"order_id"`
+		UserId   int    `db:"user_id"`
 		Price    int    `db:"price"`
 		UnitNums string `db:"unit_nums"`
 		Amount   string `db:"amount"`
@@ -193,7 +206,7 @@ func (r *APIPRepo) GetOrdersHistory(
 		}
 		res = append(res, order)
 	}
-
+	r.log.SugaredLogger.Infof("orders: %v", res)
 	return res, nil
 }
 func accessUnits(unitNumsStr string, amountStr string) ([]models.PieceUnitnum, error) {
@@ -224,11 +237,21 @@ func (r *APIPRepo) StoreReview(
 	userId int,
 	reviewText string,
 ) error {
-	query := fmt.Sprintf("INSERT INTO %s (user_id, review) VALUES ($1, $2)", "reviews")
+	query := fmt.Sprintf("INSERT INTO %s (user_id, text) VALUES ($1, $2)", "reviews")
 
 	tx := r.DB.MustBegin()
-
 	tx.MustExecContext(ctx, query, userId, reviewText)
+	return tx.Commit()
+}
 
+func (r *APIPRepo) StoreUser(
+	ctx context.Context,
+	address string,
+	email string,
+	phone string,
+) error {
+	query := fmt.Sprintf("INSERT INTO %s (address, email, phone) VALUES ($1, $2, $3)", "users")
+	tx := r.DB.MustBegin()
+	tx.MustExecContext(ctx, query, address, email, phone)
 	return tx.Commit()
 }

@@ -10,5 +10,9 @@ func (s *serverAPI) SendOrder(
 	ctx context.Context,
 	in *grpc_orders.SendOrderReq,
 ) (*grpc_orders.EmptyOrderResp, error) {
-	return s.orderProvider.StoreOrder(ctx, in)
+	resp := &grpc_orders.EmptyOrderResp{}
+	if in.GetState().String() == "CANCELLED" {
+		return resp, s.orderProvider.CancelOrder(ctx, in)
+	}
+	return resp, s.orderProvider.StoreOrder(ctx, in)
 }

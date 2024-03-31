@@ -5,12 +5,45 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/eeQuillibrium/pizza-delivery/internal/domain/models"
 	grpc_orders "github.com/eeQuillibrium/protos/gen/go/orders"
 )
 
 func (h *Handler) ordersHandler(w http.ResponseWriter, r *http.Request) {
+}
+func (h *Handler) ordersCancelHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		h.log.SugaredLogger.Fatalf("error in body readeing: %w", err)
+	}
+
+	order := models.Order{}
+	json.Unmarshal(data, &order)
+
+	in := orderAccessor(&order)
+
+	if _, err := h.gRPCApp.GatewayClient.SendOrder(ctx, in); err != nil {
+		w.WriteHeader(http.StatusBadGateway)
+		h.log.SugaredLogger.Fatalf("gateway sending problem: %w", err)
+	}
+
+	if _, err := h.gRPCApp.KitchenClient.SendOrder(ctx, in); err != nil {
+		w.WriteHeader(http.StatusBadGateway)
+		h.log.SugaredLogger.Fatalf("kitchen sending problem: %w", err)
+	}
+
+	if err := h.services.CancelOrder(ctx, in); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		h.log.SugaredLogger.Fatalf("cancel order problem: %w", err)
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 func (h *Handler) ordersGetHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()

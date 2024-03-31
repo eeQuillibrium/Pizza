@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/eeQuillibrium/pizza-delivery/internal/domain/models"
 	"github.com/redis/go-redis/v9"
@@ -24,40 +23,7 @@ func (r *OPRepo) StoreOrder(
 	ctx context.Context,
 	order *models.Order,
 ) error {
-	var err error
 	orderKey := fmt.Sprintf("order:%d", order.OrderId)
-
-	if err = r.storeOrder(ctx, order, orderKey); err != nil {
-		return err
-	}
-
-	userKey := fmt.Sprintf("user:%d", order.UserId)
-
-	var last int = -1
-
-	lastStr := r.rClient.HGetAll(ctx, userKey).Val()["last"]
-	if lastStr != "" {
-		last, err = strconv.Atoi(lastStr)
-		if err != nil {
-			return err
-		}
-	}
-
-	if err := r.rClient.HMSet(
-		ctx, userKey,
-		fmt.Sprintf("order:%d", last+1), orderKey,
-		"last", last+1).
-		Err(); err != nil {
-		return err
-	}
-
-	return nil
-}
-func (r *OPRepo) storeOrder(
-	ctx context.Context,
-	order *models.Order,
-	orderKey string,
-) error {
 	if err := r.rClient.HMSet(
 		ctx,
 		orderKey,
@@ -80,4 +46,11 @@ func (r *OPRepo) storeOrder(
 	}
 
 	return nil
+}
+
+func (r *OPRepo) DeleteOrder(
+	ctx context.Context,
+	orderId int,
+) error {
+	return r.rClient.Del(ctx, fmt.Sprintf("order:%d", orderId)).Err()
 }

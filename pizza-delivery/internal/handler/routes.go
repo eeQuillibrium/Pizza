@@ -11,6 +11,7 @@ func (h *Handler) InitRoutes() http.Handler {
 	r.Get("/", h.homeHandler)
 
 	r.Get("/orders", h.ordersHandler)
+	r.Get("/orders/cancel", h.ordersCancelHandler)
 	r.Get("/orders/get", h.ordersGetHandler)
 	r.Post("/orders/send/gateway", h.sendGatewayHandler)
 	return r

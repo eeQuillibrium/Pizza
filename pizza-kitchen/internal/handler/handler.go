@@ -28,7 +28,9 @@ func New(
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
 
+	router.GET("/orders")
 	router.GET("/orders/get", h.ordersGetHandler)
+	router.DELETE("/orders/cancel", h.ordersCancel)
 	router.POST("/orders/send/delivery", h.sendDeliveryHandler)
 
 	return router

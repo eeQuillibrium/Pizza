@@ -36,14 +36,13 @@ func New(
 	portClientDelivery int,
 	portServAPI int,
 	kService *service.Service,
-	//grpcPortDel int,
 ) *GRPCApp {
 	gatewayConn := setConn(log, portClientAPI)
 
 	deliveryConn := setConn(log, portClientDelivery)
 
 	grpcServAPI := grpc.NewServer()
-	server.Register(grpcServAPI, kService)
+	server.Register(grpcServAPI, kService.OrderProvider)
 
 	return &GRPCApp{
 		log:         log,
@@ -83,4 +82,3 @@ func (g *GRPCApp) Stop() {
 	g.log.SugaredLogger.Infof("stopping gRPC server %v", g.portServAPI)
 	g.grpcServAPI.GracefulStop()
 }
-

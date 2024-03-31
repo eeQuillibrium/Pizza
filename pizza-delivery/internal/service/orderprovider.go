@@ -23,7 +23,7 @@ func NewOPService(
 func (s *OPService) StoreOrder(
 	ctx context.Context,
 	in *grpc_orders.SendOrderReq,
-) (*grpc_orders.EmptyOrderResp, error) {
+) error {
 	order := &models.Order{
 		OrderId: int(in.Orderid),
 		UserId:  int(in.Userid),
@@ -39,6 +39,12 @@ func (s *OPService) StoreOrder(
 			})
 	}
 
-	return &grpc_orders.EmptyOrderResp{}, s.repo.StoreOrder(ctx, order)
+	return s.repo.StoreOrder(ctx, order)
+}
 
+func (s *OPService) CancelOrder(
+	ctx context.Context,
+	in *grpc_orders.SendOrderReq,
+) error {
+	return s.repo.DeleteOrder(ctx, int(in.Orderid))
 }

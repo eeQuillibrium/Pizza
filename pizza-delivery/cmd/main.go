@@ -36,7 +36,7 @@ func main() {
 	repo := repository.New(rdb)
 	services := service.New(repo)
 
-	gRPCApp := grpcapp.New(log, services.OrderProvider, cfg.GRPC.Client.Port)
+	gRPCApp := grpcapp.New(log, services.OrderProvider, cfg.GRPC.GatewayClient.Port, cfg.GRPC.KitchenClient.Port)
 	handl := handler.New(log, services, gRPCApp)
 	restApp := restapp.New(log, cfg.REST.Port, handl.InitRoutes())
 
@@ -52,7 +52,7 @@ func main() {
 	log.SugaredLogger.Infof("try to stop app with %v", sign)
 
 	ctx := context.Background()
-	
+
 	appl.GracefulStop(ctx)
 
 	if err := rdb.ShutdownSave(ctx).Err(); err != nil {

@@ -7,25 +7,23 @@ import (
 	"google.golang.org/grpc"
 )
 
-type APIGatewayClient struct {
-	grpcClient grpc_orders.OrderingClient
+type KitchenClient struct {
 	grpcConn   *grpc.ClientConn
+	grpcClient grpc_orders.OrderingClient
 }
 
-func NewAPIClient(
-	grpcClient grpc_orders.OrderingClient,
+func NewKitchenClient(
 	grpcConn *grpc.ClientConn,
-) *APIGatewayClient {
-	return &APIGatewayClient{
+	grpcClient grpc_orders.OrderingClient,
+) *KitchenClient {
+	return &KitchenClient{
+		grpcConn:   grpcConn,
 		grpcClient: grpcClient,
 	}
 }
-
-func (c *APIGatewayClient) SendOrder(
+func (c *KitchenClient) SendOrder(
 	ctx context.Context,
 	in *grpc_orders.SendOrderReq,
 ) (*grpc_orders.EmptyOrderResp, error) {
 	return c.grpcClient.SendOrder(ctx, in)
 }
-
-

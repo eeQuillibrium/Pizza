@@ -40,3 +40,10 @@ func (s *OPService) ProvideOrder(
 
 	return s.repo.StoreOrder(ctx, order)
 }
+
+func (s *OPService) CancelOrder(
+	ctx context.Context,
+	in *grpc_orders.SendOrderReq,
+) error {
+	return s.repo.DeleteOrder(ctx, int(in.Orderid))
+}
