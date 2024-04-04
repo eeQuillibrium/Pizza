@@ -3,19 +3,22 @@ package storage
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/eeQuillibrium/pizza-auth/internal/domain/models"
+	"github.com/eeQuillibrium/pizza-auth/internal/logger"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 type Storage struct {
-	DB *sqlx.DB
+	DB  *sqlx.DB
+	log *logger.Logger
 }
 
-func New(dsn string) *Storage {
-	log.Print("trying to open postgres database...")
+func New(
+	dsn string,
+	log *logger.Logger,
+) *Storage {
 
 	db, err := sqlx.Open("postgres", dsn)
 	if err != nil {
@@ -26,9 +29,10 @@ func New(dsn string) *Storage {
 		log.Fatalf("db ping error: %v", err)
 	}
 
-	log.Print("success database open!")
-
-	return &Storage{db}
+	return &Storage{
+		DB: db, 
+		log: log,
+	}
 }
 
 func (s *Storage) CreateUser(
@@ -42,7 +46,7 @@ func (s *Storage) CreateUser(
 	row := s.DB.QueryRow(q, phone, passHash)
 
 	if err := row.Scan(&userId); err != nil {
-		log.Fatalf("can't scan from rows")
+		s.log.Fatalf("can't scan from rows")
 	}
 
 	return userId, nil

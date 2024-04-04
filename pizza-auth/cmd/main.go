@@ -2,23 +2,25 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/eeQuillibrium/pizza-auth/internal/app"
 	"github.com/eeQuillibrium/pizza-auth/internal/config"
+	"github.com/eeQuillibrium/pizza-auth/internal/logger"
 	"github.com/joho/godotenv"
 )
 
 func main() {
 
+	log := logger.New()
+
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Env var didn't loaded: %v", err)
 	}
 
-	cfg := config.InitConfig()
+	cfg := config.New(log)
 
 	appl := app.New(
 		cfg.GRPC.Port,
@@ -32,6 +34,7 @@ func main() {
 			cfg.Storage.Port,
 			cfg.Storage.SSLMode,
 		),
+		log,
 	)
 
 	go appl.GRPCSrv.Run()
@@ -41,8 +44,7 @@ func main() {
 
 	sign := <-stop
 
-	log.Print("try to stop the program with ", sign)
+	log.Infof("try to stop the program with ", sign)
 	appl.GRPCSrv.Stop()
-
-	log.Print("program was stopped")
+	log.SugaredLogger.Info("program was stopped")
 }

@@ -9,6 +9,11 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const (
+	emptyInt    = 0
+	emptyString = ""
+)
+
 // service (in services/auth)
 type Auth interface {
 	Login(
@@ -25,6 +30,10 @@ type Auth interface {
 		ctx context.Context,
 		UserId int64,
 	) (bool, error)
+	UserIdentify(
+		ctx context.Context,
+		token string,
+	) (int, error)
 }
 
 // handler
@@ -87,10 +96,13 @@ func (s *serverAPI) IsAdmin(
 	return nil, nil
 }
 
-const (
-	emptyInt    = 0
-	emptyString = ""
-)
+func (s *serverAPI) UserIdentify(
+	ctx context.Context,
+	req *nikita_auth1.IdentifyRequest,
+) (*nikita_auth1.IdentifyResponse, error) {
+	userId, err := s.auth.UserIdentify(ctx, req.GetToken())
+	return &nikita_auth1.IdentifyResponse{UserId: int64(userId)}, err
+}
 
 func validateLogin(appId int32, login string, pass string) error {
 	if appId == emptyInt {

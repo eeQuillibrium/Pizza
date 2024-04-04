@@ -29,6 +29,10 @@ type Auth interface {
 		ctx context.Context,
 		in *nikita_auth1.IsAdminRequest,
 	) (bool, error)
+	UserIdentify(
+		ctx context.Context,
+		in *nikita_auth1.IdentifyRequest,
+	) (int, error)
 }
 
 type OrderSender interface {
@@ -40,15 +44,17 @@ type OrderSender interface {
 
 type GRPCApp struct {
 	log         *logger.Logger
+	serverPort  int
+	OrderServer *grpc.Server
 	Auth        Auth
 	KitchenOS   OrderSender
 	DeliveryOS  OrderSender
-	OrderServer *grpc.Server
 	//other grpc
 }
 
 func New(
 	log *logger.Logger,
+	serverPort int,
 	authport int,
 	kitchenport int,
 	deliveryport int,
@@ -75,10 +81,11 @@ func New(
 
 	return &GRPCApp{
 		log:         log,
+		serverPort:  serverPort,
+		OrderServer: serv,
 		Auth:        auth,
 		KitchenOS:   kitchenOS,
 		DeliveryOS:  deliveryOS,
-		OrderServer: serv,
 	}
 }
 
@@ -93,12 +100,10 @@ func setConn(
 	return conn
 }
 
-func (a *GRPCApp) Run(
-	orderPort int,
-) {
-	a.log.SugaredLogger.Infof("run grpc server on %d", orderPort)
+func (a *GRPCApp) Run() {
+	a.log.SugaredLogger.Infof("run grpc server on %d", a.serverPort)
 
-	lst, err := net.Listen("tcp", fmt.Sprintf(":%d", orderPort))
+	lst, err := net.Listen("tcp", fmt.Sprintf(":%d", a.serverPort))
 
 	if err != nil {
 		a.log.SugaredLogger.Fatal("listen was dropped")
@@ -107,6 +112,7 @@ func (a *GRPCApp) Run(
 	if err := a.OrderServer.Serve(lst); err != nil {
 		a.log.SugaredLogger.Fatal("serving was dropped")
 	}
+
 }
 
 func (a *GRPCApp) Stop() {

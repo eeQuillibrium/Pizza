@@ -39,6 +39,7 @@ func (g *AuthClient) Register(
 	}
 	return r.GetUserId(), nil
 }
+
 func (g *AuthClient) Login(
 	ctx context.Context,
 	in *nikita_auth1.LoginRequest,
@@ -50,11 +51,24 @@ func (g *AuthClient) Login(
 
 	return r.GetToken(), nil
 }
+
 func (g *AuthClient) IsAdmin(
 	ctx context.Context,
 	in *nikita_auth1.IsAdminRequest,
 ) (bool, error) {
 	return true, nil
+}
+
+func (g *AuthClient) UserIdentify(
+	ctx context.Context,
+	in *nikita_auth1.IdentifyRequest,
+) (int, error) {
+	resp, err := g.gRPCClient.UserIdentify(ctx, in)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(resp.GetUserId()), nil
 }
 
 func (g *AuthClient) Stop() {

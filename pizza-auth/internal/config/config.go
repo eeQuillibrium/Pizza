@@ -2,10 +2,10 @@ package config
 
 import (
 	"flag"
-	"log"
 	"os"
 	"time"
 
+	"github.com/eeQuillibrium/pizza-auth/internal/logger"
 	"gopkg.in/yaml.v3"
 )
 
@@ -16,6 +16,7 @@ type Config struct {
 	GRPC        GRPCConfig    `yaml:"grpc"`
 	TokenTTL    time.Duration `yaml:"token_ttl"`
 }
+
 type Storage struct {
 	Host     string `yaml:"host"`
 	SSLMode  string `yaml:"sslmode"`
@@ -23,20 +24,21 @@ type Storage struct {
 	DBName   string `yaml:"dbname"`
 	Username string `yaml:"username"`
 }
+
 type GRPCConfig struct {
 	Port    int           `yaml:"port"`
 	Timeout time.Duration `yaml:"timeout"`
 }
 
-func InitConfig() *Config {
+func New(log *logger.Logger) *Config {
 
 	path := fetchConfigPath()
 	if path == "" {
-		log.Fatal("path is empty")
+		log.SugaredLogger.Fatal("path is empty")
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		log.Fatal("config path is empty:", err)
+		log.SugaredLogger.Fatal("config path is empty:", err)
 	}
 
 	var cfg Config
@@ -45,7 +47,7 @@ func InitConfig() *Config {
 
 	err := yaml.Unmarshal(data, &cfg)
 	if err != nil {
-		log.Fatal("unmarshal problem occured:", err)
+		log.SugaredLogger.Fatal("unmarshal problem occured:", err)
 	}
 
 	return &cfg

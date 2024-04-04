@@ -11,6 +11,7 @@ import (
 type GRPCServer struct {
 	grpc_orders.UnimplementedOrderingServer
 	service service.OrderProvider
+	port int
 }
 
 func Register(

@@ -5,12 +5,10 @@ import (
 	"net"
 	"time"
 
-	"log"
-
 	authgrpc "github.com/eeQuillibrium/pizza-auth/internal/app/server"
+	logger "github.com/eeQuillibrium/pizza-auth/internal/logger"
 	authservice "github.com/eeQuillibrium/pizza-auth/internal/services/auth"
 	authstorage "github.com/eeQuillibrium/pizza-auth/internal/storage"
-
 	"google.golang.org/grpc"
 )
 
@@ -18,34 +16,37 @@ type App struct {
 	gRPCServer *grpc.Server
 	port       int
 	tokenTTL   time.Duration
+	log        *logger.Logger
 }
 
 func New(
 	port int,
 	tokenTTL time.Duration,
 	dsn string,
+	log *logger.Logger,
 ) *App {
 	gRPCServer := grpc.NewServer()
-	authStorage := authstorage.New(dsn)
-	authService := authservice.New(authStorage, tokenTTL)
+	authStorage := authstorage.New(dsn, log)
+	authService := authservice.New(authStorage, tokenTTL, log)
 	authgrpc.Register(gRPCServer, authService)
 
 	return &App{
 		gRPCServer: gRPCServer,
 		port:       port,
 		tokenTTL:   tokenTTL,
+		log: log,
 	}
 }
 
 func (a *App) Run() error {
-	log.Print("Starting gRPC server...")
+	a.log.SugaredLogger.Info("starting gRPC server...")
 
 	lst, err := net.Listen("tcp", fmt.Sprintf(":%d", a.port))
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
-	log.Print("gRPC server running...")
+	a.log.SugaredLogger.Info("gRPC server running...")
 
 	if err := a.gRPCServer.Serve(lst); err != nil {
 		return fmt.Errorf("%w", err)
@@ -55,6 +56,6 @@ func (a *App) Run() error {
 }
 
 func (a *App) Stop() {
-	log.Printf("Stopping gRPC server %v...", a.port)
+	a.log.SugaredLogger.Info("stopping gRPC server %v...", a.port)
 	a.gRPCServer.GracefulStop() // graceful stopdown
 }

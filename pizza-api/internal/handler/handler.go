@@ -16,35 +16,39 @@ type Handler struct {
 func New(
 	log *logger.Logger,
 	service *service.Service,
-	authPort int,
-	kitchenPort int,
-	deliveryPort int,
+	gRPCApp *grpcapp.GRPCApp,
 ) *Handler {
-	grpcapp := grpcapp.New(log, authPort, kitchenPort, deliveryPort, service.OrderProvider)
+
 	return &Handler{
 		log:     log,
 		service: service,
-		GRPCApp: grpcapp,
+		GRPCApp: gRPCApp,
 	}
 }
 
 func (h *Handler) InitRoutes() *mux.Router {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/home", h.homeHandler)
+	auth := r.PathPrefix("/auth").Subrouter()
+	auth.HandleFunc("/auth", h.authHandler)
+	auth.HandleFunc("/auth/signUp", h.signUpHandler)
+	auth.HandleFunc("/auth/signIn", h.signInHandler)
 
-	r.HandleFunc("/orders", h.ordersHandler)
-	r.HandleFunc("/orders/create", h.createOrderHandler)
-	r.HandleFunc("/orders/cancel", h.ordersCancelHandler)
-	r.HandleFunc("/orders/current", h.ordersCurrentHandler)
-	r.HandleFunc("/orders/history", h.ordersHistoryHandler)
+	home := r.PathPrefix("/home").Subrouter()
+	home.HandleFunc("/", h.homeHandler)
 
-	r.HandleFunc("/auth", h.authHandler)
-	r.HandleFunc("/auth/signUp", h.signUpHandler)
-	r.HandleFunc("/auth/signIn", h.signInHandler)
+	orders := r.PathPrefix("/orders").Subrouter()
+	orders.HandleFunc("/", h.ordersHandler)
+	orders.HandleFunc("/create", h.createOrderHandler)
+	orders.HandleFunc("/cancel", h.ordersCancelHandler)
+	orders.HandleFunc("/current", h.ordersCurrentHandler)
+	orders.HandleFunc("/history", h.ordersHistoryHandler)
+	orders.Use(h.userIdentify)
 
-	r.HandleFunc("/review", h.reviewHandler)
-	r.HandleFunc("/review/send", h.reviewSendHandler)
+	review := r.PathPrefix("/review").Subrouter()
+	review.HandleFunc("/", h.reviewHandler)
+	review.HandleFunc("/send", h.reviewSendHandler)
+	review.Use(h.userIdentify)
 
 	return r
 }
