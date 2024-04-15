@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  gateway-app:
+    build: ./
+    command: ./bin/main
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres_db
+      - redis_db
+  postgres_db:
+    restart: always
+    image: postgres:latest
+    volumes:
+      - /var/lib/postgresql/data
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DBNAME=gateway
+  redis_db:
+    restart: always
+    image: redis/redis-stack:latest
+    volumes:
+      - /root/redis
+      - /usr/local/etc/redis/redis.conf
+    ports:
+      - 6378:6379
+

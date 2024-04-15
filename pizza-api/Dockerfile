@@ -1,15 +1,11 @@
 FROM golang:latest
 
 ENV CONFIG_PATH="configs/config.yaml"
+ENV DB_PASSWORD="secret"
 
-COPY go.mod go.sum ./
+COPY ./ ./
 RUN go mod download
 
-COPY ./ ./
-RUN go get ./...
-
-COPY ./ ./
-RUN CGO_ENABLED=0 go build -o bin cmd/main.go
-
+RUN go build -o ./bin ./cmd/main.go
 
 CMD ["./bin/main"]

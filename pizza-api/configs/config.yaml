@@ -16,13 +16,13 @@ grpc:
 
 repo:
   redis:
-    port: 6378
+    port: 6379
     password: ""
     db: 0
   postgres:
     sslmode: "disable"
-    host: "localhost"
-    port: 5433
+    host: "postgres_db"
+    port: 5432
     dbname: "postgres"
     username: "postgres"
   

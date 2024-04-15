@@ -14,6 +14,8 @@ import (
 	"github.com/eeQuillibrium/pizza-api/internal/logger"
 	"github.com/eeQuillibrium/pizza-api/internal/repository"
 	"github.com/eeQuillibrium/pizza-api/internal/service"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jmoiron/sqlx"
 	"github.com/redis/go-redis/v9"
 )
@@ -30,7 +32,7 @@ func New(
 	cfg := config.New()
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("localhost:%d", cfg.Repo.Redis.Port),
+		Addr:     fmt.Sprintf("redis_db:%d", cfg.Repo.Redis.Port),
 		Password: cfg.Repo.Redis.Password,
 		DB:       cfg.Repo.Redis.DB,
 	})
@@ -46,8 +48,18 @@ func New(
 	if err != nil {
 		log.SugaredLogger.Fatalf("problem with postgres db.Open() occured: %w", err)
 	}
+
 	if err := db.Ping(); err != nil {
 		log.SugaredLogger.Fatalf("postgres db ping problem occured: %w", err)
+	}
+
+	m, err := migrate.New("migrations/", "postgres://postgres:secret@postgres_db:5433/postgres?sslmode=disable")
+	if err != nil {
+		log.Fatalf("cannot migrate %v", err)
+	}
+
+	if err := m.Up(); err != nil {
+		log.Fatalf("migration err %v", err)
 	}
 
 	repo := repository.New(log, db, rdb)
@@ -80,6 +92,7 @@ func (a *App) Run() {
 		a.log.SugaredLogger.Infof("error with rdb shutdown : %w", err)
 	}*/
 }
+
 func (a *App) GracefulStop(ctx context.Context) {
 	a.GRPCApp.Stop()
 	a.RESTApp.Stop(ctx)

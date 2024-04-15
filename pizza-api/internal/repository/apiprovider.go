@@ -15,6 +15,9 @@ import (
 
 const (
 	zeroInt = 0
+	orderDBName = "orders"
+	reviewDBName = "reviews"
+	userDBName = "users"
 )
 
 type APIPRepo struct {
@@ -91,13 +94,15 @@ func (r *APIPRepo) storeOrder(
 	userId int,
 ) (int, error) {
 	q := fmt.Sprintf("INSERT INTO %s (price, unit_nums, amount, state, user_id) "+
-		"VALUES ($1, $2, $3, $4, $5) RETURNING order_id", "orders")
+		"VALUES ($1, $2, $3, $4, $5) RETURNING order_id", orderDBName)
 
 	var orderId int
+
 	row := r.DB.QueryRow(q, price, unitNums, amount, state, userId)
 	if err := row.Scan(&orderId); err != nil {
 		return zeroInt, err
 	}
+
 	return orderId, nil
 }
 func (r *APIPRepo) updateLast(
@@ -175,18 +180,9 @@ func (r *APIPRepo) GetOrdersHistory(
 	ctx context.Context,
 	userId int,
 ) ([]*models.Order, error) {
-	queryOrders := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1 AND state <> 'ORDERED'", "orders")
+	queryOrders := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1 AND state <> 'ORDERED'", orderDBName)
 
-	type OrderDB struct {
-		OrderId  int    `db:"order_id"`
-		Price    int    `db:"price"`
-		UnitNums string `db:"unit_nums"`
-		Amount   string `db:"amount"`
-		State    string `db:"state"`
-		UserId   int    `db:"user_id"`
-	}
-
-	orders := []OrderDB{}
+	orders := []models.OrderDB{}
 
 	if err := r.DB.Select(&orders, queryOrders, userId); err != nil {
 		return nil, err
@@ -239,7 +235,7 @@ func (r *APIPRepo) StoreReview(
 	userId int,
 	reviewText string,
 ) error {
-	query := fmt.Sprintf("INSERT INTO %s (user_id, text) VALUES ($1, $2)", "reviews")
+	query := fmt.Sprintf("INSERT INTO %s (user_id, text) VALUES ($1, $2)", reviewDBName)
 
 	tx := r.DB.MustBegin()
 	tx.MustExecContext(ctx, query, userId, reviewText)
@@ -252,7 +248,7 @@ func (r *APIPRepo) StoreUser(
 	email string,
 	phone string,
 ) error {
-	query := fmt.Sprintf("INSERT INTO %s (address, email, phone) VALUES ($1, $2, $3)", "users")
+	query := fmt.Sprintf("INSERT INTO %s (address, email, phone) VALUES ($1, $2, $3)", userDBName)
 	tx := r.DB.MustBegin()
 	tx.MustExecContext(ctx, query, address, email, phone)
 	return tx.Commit()
